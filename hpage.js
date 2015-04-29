@@ -242,7 +242,7 @@ var HPage = {};
 
     function identity(str) {
         return str;
-    };
+    }
 
     function getParser(divid) {
         try {
@@ -258,7 +258,7 @@ var HPage = {};
         }
     }
 
-    var encString = "***Encrypted data***";
+    var encString = "***x***";
 
     module.loadPage = function (divid, nopreview, previous) {
         var isBoxed = false;
@@ -332,6 +332,22 @@ var HPage = {};
                 editor = undefined;
             }
 
+            function saveAction(e) {
+                var content = editor.getValue();
+                var oldContent = $divtext.data('raw');
+                if (content !== oldContent) {
+                    save(divid, content, function (content) {
+                        $divtext.data('raw', content);
+                        if (!nopreview) $divhtml.html(parser(content));
+                        //if (e !== editor)
+                            switchToPreview();
+                    });
+                } else {
+                    //if (e !== editor)
+                        switchToPreview();
+                }
+            }
+
             $buttonEdit.click(function () {
                 if ($divtext.data('raw')!==encString) {
                     $buttonSave.show();
@@ -341,13 +357,15 @@ var HPage = {};
                     editor = CodeMirror.fromTextArea($divtext[0], {
                         mode: getMode(divid),
                         theme: "default",
+                        lineWrapping: true,
                         extraKeys: {
                             "Ctrl-Enter": function (cm) {
                                 cm.setOption("fullScreen", !cm.getOption("fullScreen"));
                             },
                             "Esc": function (cm) {
                                 if (cm.getOption("fullScreen")) cm.setOption("fullScreen", false);
-                            }
+                            },
+                            "Ctrl-s": saveAction
                         }
                     });
                     editor.setValue($divtext.data('raw'));
@@ -361,20 +379,7 @@ var HPage = {};
                 }
             });
 
-            $buttonSave.click(function () {
-                    var content = editor.getValue();
-                    var oldContent = $divtext.data('raw');
-                    if (content !== oldContent) {
-                        save(divid, content, function (content) {
-                            $divtext.data('raw', content);
-                            if (!nopreview) $divhtml.html(parser(content));
-                            switchToPreview();
-                        });
-                    } else {
-                        switchToPreview();
-                    }
-                }
-            );
+            $buttonSave.click(saveAction);
 
             $buttonRemove.click(function () {
                     BootstrapDialog.show({
@@ -446,5 +451,33 @@ var HPage = {};
         var $collapse = $('#'+sanitize(str));
         $collapse.collapse('toggle');
     };
+
+    module.initUploader = function() {
+        $("#kms-drop-area-div").dmUploader({
+            url: HPage.URL,
+            extraData: {
+                'action': 'upload', get directory() {
+                    return $('#kms-file').val()
+                }, get password() {
+                    return $('#kms-password').val()
+                }
+            },
+            fileName: 'uploaded',
+            onInit: function () {
+                console.log('Plugin successfully initialized');
+            },
+            onUploadSuccess: function (id, data) {
+                console.log('Succefully upload #' + id);
+                console.log('Server response was:');
+                console.log(data);
+                BootstrapDialog.show({
+                    message: 'Successfully uploaded '+ JSON.parse(data).data
+                });
+            },
+            onComplete: function () {
+                console.log('We reach the end of the upload Queue!');
+            }
+        });
+    }
 
 }(HPage));

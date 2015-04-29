@@ -4,7 +4,7 @@
 
 <?php
 $salt = 'lr';
-$cpassword = 'password hash should be here';
+$cpassword = 'lr3.03PB8eShg';
 
 if (array_key_exists('action',$_POST) && $_POST['action'] == 'read' && (!array_key_exists('password',$_POST) || crypt($_POST['password'],$salt) == $cpassword)) {
     if (array_key_exists('file', $_POST) && file_exists('hpage/'.$_POST['file'])) {
@@ -32,6 +32,23 @@ if (array_key_exists('action',$_POST) && $_POST['action'] == 'read' && (!array_k
         'data' => 'true'
      );
     echo json_encode($advert);
+} else if (array_key_exists('action',$_POST) && $_POST['action'] == 'upload' && array_key_exists('password',$_POST) && crypt($_POST['password'],$salt) == $cpassword) {
+        if (array_key_exists('directory',$_POST)){
+                $target = $_POST['directory'];
+        } else {                
+		$target = "./";   
+        }
+        $target = $target .'/'. basename( $_FILES['uploaded']['name']) ;  
+        if(move_uploaded_file($_FILES['uploaded']['tmp_name'], $target))  { 
+                $advert = array(
+                        'data' => $target
+                );
+        } else {
+                $advert = array(
+                        'data' => 'false'
+                );
+	} 
+        echo json_encode($advert);
 }
 
 ?>

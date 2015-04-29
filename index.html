@@ -25,6 +25,7 @@
     <script src="libkms/creole.js"></script>
     <script src="libkms/bibtex_js.js"></script>
     <script src="libkms/aes.js"></script>
+    <script src="libkms/dmuploader.min.js"></script>
     <script src="hpage.js"></script>
 
     <style type="text/css">.CodeMirror {
@@ -113,7 +114,13 @@
                     <input id="kms-file" class="pull-right form-control input-sm"
                            style="padding: 1em;">
                 </div>
-                <a href="javascript:HPage.loadPage($('#kms-file').val(),true,'kms-main-edit')" class="glyphicon-edit"></a>
+                <div id="kms-drop-area-div" class="col-md-2">
+                    Drag and Drop Files Here<br/>
+                </div>
+                <div class="col-md-2">
+                    <a href="javascript:HPage.loadPage($('#kms-file').val(),true,'kms-main-edit')"
+                       class="glyphicon-edit"></a>
+                </div>
             </div>
             <p><a class="glyphicon-plus" onclick="javascript:HPage.toggleCollapse('kms-collapse');"></a></p>
 
@@ -121,6 +128,11 @@
     </div>
     <div id="kms-main-edit"></div>
 </div>
+
+<script type="text/javascript">
+    HPage.initUploader();
+</script>
+
 </body>
 </html>
 
