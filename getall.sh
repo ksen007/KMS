@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+rm -rf libkms
+mkdir libkms
+cd libkms
 
 wget https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css
 wget https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.34.4/css/bootstrap-dialog.min.css
