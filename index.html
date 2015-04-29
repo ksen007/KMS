@@ -1,0 +1,122 @@
+<!doctype html>
+
+<html lang="en">
+
+<title>Homepage Editor</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <link rel="stylesheet" href="bootstrap-dialog.min.css">
+    <link rel="stylesheet" href="codemirror.min.css">
+    <link rel="stylesheet" href="fullscreen.min.css">
+
+    <script src="jquery.min.js"></script>
+    <script src="bootstrap.min.js"></script>
+    <script src="bootstrap-dialog.min.js"></script>
+    <script src="codemirror.min.js"></script>
+    <script src="markdown.min.js"></script>
+    <script src="css.min.js"></script>
+    <script src="javascript.min.js"></script>
+    <script src="xml.min.js"></script>
+    <script src="htmlembedded.min.js"></script>
+    <script src="fullscreen.min.js"></script>
+    <script src="showdown.min.js"></script>
+    <script src="creole.js"></script>
+    <script src="bibtex_js.js"></script>
+    <script src="aes.js"></script>
+    <script src="hpage.js"></script>
+
+    <style type="text/css">.CodeMirror {
+        border: 1px solid black;
+        height: auto;
+    }</style>
+
+</head>
+<body>
+
+<div class="bibtex_template">
+    <dt> [
+        <span class="if myconfurl">
+            <a class="myconfurl"><span class="myconfname"></span></a>
+        </span>
+        <span class="if pdf">
+            | <a class="pdf"> pdf </a>
+        </span>
+        <span class="if ps">
+            |<a class="ps"> ps </a>
+        </span>
+        <span class="if slides">
+            |<a class="slides"> ppt </a>
+        </span>
+        <span class="if tr">
+            |<a class="tr"> tr </a>
+        </span>
+        ]
+    </dt>
+    <dd style="margin-left: 20px">
+              <span class="if author">
+                <span class="author"></span>,
+              </span>
+        "<span class="title"></span>,"
+              <span class="if booktitle" style="font-style: italic;">
+                in <span class="booktitle" style="font-style: italic;"></span>,
+              </span>
+              <span class="if journal" style="font-style: italic;">
+                <span class="journal"></span>,
+              </span>
+              <span class="if publisher">
+                <span class="publisher"></span>,
+              </span>
+              <span class="if school">
+                <span class="school"></span>
+              </span>
+              <span class="if volume">
+                <span class="volume"></span>
+                <span class="if number">
+                  (<span class="number"></span>)
+                </span>
+                <span class="if pages">
+                  pages <span class="pages"></span>
+                </span>
+              </span>
+              <span class="if year">
+                 <span class="year"></span>.
+              </span>
+    </dd>
+</div>
+
+
+<div id="index.html"></div>
+<script type="text/javascript">
+    HPage.loadLastDivPage();
+</script>
+
+<div class="container">
+    <div class="row">
+        <div class="span4 collapse-group">
+            <div id="kms-collapse" class="collapse">
+                <div class="form-group col-md-2">
+                    <input type="password" id="kms-key1" class="pull-right form-control input-sm" style="padding: 1em;"
+                           placeholder="Enter key for encryption ...">
+                </div>
+                <div class="form-group col-md-2">
+                    <input type="password" id="kms-key2" class="pull-right form-control input-sm" style="padding: 1em;"
+                           placeholder="Reenter key for encryption ...">
+                </div>
+                <div class="form-group col-md-2">
+                    <input type="password" id="kms-password" class="pull-right form-control input-sm"
+                           style="padding: 1em;"
+                           placeholder="Enter password for editing ...">
+                </div>
+            </div>
+            <p><a class="glyphicon-plus" onclick="javascript:HPage.toggleCollapse('kms-collapse');"></a></p>
+
+        </div>
+    </div>
+</div>
+</body>
+</html>
+
+
+
