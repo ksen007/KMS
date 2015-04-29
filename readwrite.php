@@ -6,7 +6,7 @@
 $salt = 'lr';
 $cpassword = 'password hash should be here';
 
-if (array_key_exists('action',$_POST) && $_POST['action'] == 'read') {
+if (array_key_exists('action',$_POST) && $_POST['action'] == 'read' && (!array_key_exists('password',$_POST) || crypt($_POST['password'],$salt) == $cpassword)) {
     if (array_key_exists('file', $_POST) && file_exists('hpage/'.$_POST['file'])) {
         $content = file_get_contents('hpage/'.$_POST['file']);
     } else {

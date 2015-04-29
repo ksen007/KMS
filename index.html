@@ -2,7 +2,7 @@
 
 <html lang="en">
 
-<title>Homepage Editor</title>
+<title>Koushik Sen's Homepage</title>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <head>
@@ -109,11 +109,17 @@
                            style="padding: 1em;"
                            placeholder="Enter password for editing ...">
                 </div>
+                <div class="form-group col-md-2">
+                    <input id="kms-file" class="pull-right form-control input-sm"
+                           style="padding: 1em;">
+                </div>
+                <a href="javascript:HPage.loadPage($('#kms-file').val(),true,'kms-main-edit')" class="glyphicon-edit"></a>
             </div>
             <p><a class="glyphicon-plus" onclick="javascript:HPage.toggleCollapse('kms-collapse');"></a></p>
 
         </div>
     </div>
+    <div id="kms-main-edit"></div>
 </div>
 </body>
 </html>

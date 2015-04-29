@@ -2,8 +2,8 @@ var HPage = {};
 (function (module) {
 
     module.URL = "https://apps.eecs.berkeley.edu/~ksen/readwrite.php";
-    var converter = new Showdown.converter();
 
+    var markdown = new Showdown.converter();
 
     var creole = (function() {
         var creole = new Parse.Simple.Creole();
@@ -96,8 +96,15 @@ var HPage = {};
     }
 
     function load(divid, promise) {
-        var data = {'file': divid, 'action': 'read', 'password': $('#kms-password').val()};
-        var tmp;
+        var tmp, pass;
+        var data = {'file': divid, 'action': 'read'};
+
+        // someone is trying access file outside the safe zone
+        // need to check password
+        if (divid.indexOf('..')>=0 || divid.indexOf('/')==0) {
+            pass = $('#kms-password').val();
+            data.password = (pass?pass:"");
+        }
 
         console.log("Loading " + data.file + " ... ");
         $.ajax({
@@ -194,7 +201,7 @@ var HPage = {};
         },
         '.md': {
             mode: 'markdown', converter: function (str) {
-                return expand(converter.makeHtml(str));
+                return expand(markdown.makeHtml(str));
             }
         },
         '.wiki': {
@@ -220,40 +227,60 @@ var HPage = {};
     };
 
     function getMode(divid) {
-        var pos = divid.lastIndexOf('.');
-        if (pos >= 0) {
-            var ext = divid.substring(pos);
-            return plugins[ext].mode;
-        } else {
+        try {
+            var pos = divid.lastIndexOf('.');
+            if (pos >= 0) {
+                var ext = divid.substring(pos);
+                return plugins[ext].mode;
+            } else {
+                return undefined;
+            }
+        } catch(e) {
             return undefined;
         }
     }
 
+    function identity(str) {
+        return str;
+    };
+
     function getParser(divid) {
-        var pos = divid.lastIndexOf('.');
-        if (pos >= 0) {
-            var ext = divid.substring(pos);
-            return plugins[ext].converter;
-        } else {
-            return function (str) {
-                return str;
-            };
+        try {
+            var pos = divid.lastIndexOf('.');
+            if (pos >= 0) {
+                var ext = divid.substring(pos);
+                return plugins[ext].converter;
+            } else {
+                return identity;
+            }
+        } catch(e) {
+            return identity;
         }
     }
 
     var encString = "***Encrypted data***";
 
-    module.loadPage = function (divid) {
+    module.loadPage = function (divid, nopreview, previous) {
         var isBoxed = false;
-        var oldDivid = divid;
+        var oldDivid = divid, tmp;
         divid = removeSquare(oldDivid);
         if (divid !== oldDivid) {
             isBoxed = true;
         }
 
+        tmp = $('#' + sanitize(divid));
+        if (!tmp.length) {
+            tmp = $('<div></div>');
+            tmp.attr('id', divid);
+            if (previous !== undefined) {
+                $('#'+sanitize(previous)).after(tmp);
+            } else {
+                $('script').last().after(tmp);
+            }
+        }
+
         if (!$('#' + sanitize(divid + '.top')).length) {
             var parser = getParser(divid);
-            var tmp = $('#' + sanitize(divid));
 
             var $div = $('\x3Cdiv id="' + divid + '.top" ' + (isBoxed ? 'class="panel panel-default"' : '') + ' style="padding: 1em;">\x3C/div>');
             tmp.append($div);
@@ -277,8 +304,9 @@ var HPage = {};
             $div.append($divtext);
             $divtext.hide();
 
-            var $divhtml = $('\x3Cdiv id = "' + divid + '.html" >Loading content ...\x3C/div>');
+            var $divhtml = $('\x3Cdiv id = "' + divid + '.html" >\x3C/div>');
             $div.append($divhtml);
+            if (!nopreview) $divhtml.html('Loading content ...');
 
             var editor;
 
@@ -290,7 +318,7 @@ var HPage = {};
                     content = encString;
                 }
                 $divtext.data('raw', content);
-                $divhtml.html(parser(content));
+                if (!nopreview) $divhtml.html(parser(content));
             });
 
             function switchToPreview() {
@@ -339,7 +367,7 @@ var HPage = {};
                     if (content !== oldContent) {
                         save(divid, content, function (content) {
                             $divtext.data('raw', content);
-                            $divhtml.html(parser(content));
+                            if (!nopreview) $divhtml.html(parser(content));
                             switchToPreview();
                         });
                     } else {
@@ -357,7 +385,7 @@ var HPage = {};
                             action: function (dialog) {
                                 remove(divid, function (content) {
                                     $divtext.data('raw', content);
-                                    $divhtml.html(parser(content));
+                                    if (!nopreview) $divhtml.html(parser(content));
                                     dialog.close();
                                 });
                             }
