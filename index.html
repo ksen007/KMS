@@ -87,43 +87,41 @@
     </dd>
 </div>
 
-
-<div id="index.html"></div>
+<div id="kms-top-div"></div>
 <script type="text/javascript">
-    HPage.loadLastDivPage();
+    HPage.loadPage("index.html","kms-top-div");
 </script>
 
 <div class="container">
+    <a data-toggle="collapse" href="#kms-collapse">
+        <span class="glyphicon glyphicon-plus"></span>
+    </a>
     <div class="row">
-        <div class="span4 collapse-group">
-            <div id="kms-collapse" class="collapse">
-                <div class="form-group col-md-2">
-                    <input type="password" id="kms-key1" class="pull-right form-control input-sm" style="padding: 1em;"
-                           placeholder="Enter key for encryption ...">
-                </div>
-                <div class="form-group col-md-2">
-                    <input type="password" id="kms-key2" class="pull-right form-control input-sm" style="padding: 1em;"
-                           placeholder="Reenter key for encryption ...">
-                </div>
-                <div class="form-group col-md-2">
-                    <input type="password" id="kms-password" class="pull-right form-control input-sm"
-                           style="padding: 1em;"
-                           placeholder="Enter password for editing ...">
-                </div>
-                <div class="form-group col-md-2">
-                    <input id="kms-file" class="pull-right form-control input-sm"
-                           style="padding: 1em;">
-                </div>
-                <div id="kms-drop-area-div" class="col-md-2">
-                    Drag and Drop Files Here<br/>
-                </div>
-                <div class="col-md-2">
-                    <a href="javascript:HPage.loadPage($('#kms-file').val(),true,'kms-main-edit')"
-                       class="glyphicon-edit"></a>
-                </div>
+        <div id="kms-collapse" class="collapse">
+            <div class="form-group col-md-2">
+                <input type="password" id="kms-key1" class="pull-right form-control input-sm" style="padding: 1em;"
+                       placeholder="Enter key for encryption ...">
             </div>
-            <p><a class="glyphicon-plus" onclick="javascript:HPage.toggleCollapse('kms-collapse');"></a></p>
-
+            <div class="form-group col-md-2">
+                <input type="password" id="kms-key2" class="pull-right form-control input-sm" style="padding: 1em;"
+                       placeholder="Reenter key for encryption ...">
+            </div>
+            <div class="form-group col-md-2">
+                <input type="password" id="kms-password" class="pull-right form-control input-sm"
+                       style="padding: 1em;"
+                       placeholder="Enter password for editing ...">
+            </div>
+            <div class="form-group col-md-2">
+                <input id="kms-file" class="pull-right form-control input-sm"
+                       style="padding: 1em;">
+            </div>
+            <div id="kms-drop-area-div" class="col-md-2">
+                Drag and Drop Files Here<br/>
+            </div>
+            <div class="col-md-2">
+                <span onclick="HPage.loadPage($('#kms-file').val(),'kms-main-edit', true)"
+                   class="glyphicon glyphicon-edit"></span>
+            </div>
         </div>
     </div>
     <div id="kms-main-edit"></div>

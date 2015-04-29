@@ -1,15 +1,14 @@
 var HPage = {};
 (function (module) {
-
     module.URL = "https://apps.eecs.berkeley.edu/~ksen/readwrite.php";
 
     var markdown = new Showdown.converter();
 
-    var creole = (function() {
+    var creole = (function () {
         var creole = new Parse.Simple.Creole();
         var div = $('<div></div>div>');
 
-        return function(str) {
+        return function (str) {
             div.html('');
             creole.parse(div[0], str);
             return div.html();
@@ -40,8 +39,9 @@ var HPage = {};
                 throw new Error("End marker not found in " + str);
             }
             var code = str.substring(sidx + BMARKER_LEN, eidx);
-            var divid = removeSquare(code);
-            var newCode = '<div id="' + divid + '" ></div>\x3Cscript type="text/javascript">HPage.loadPage("' + code + '");\x3C/script>';
+            var id = 'placeholder-' + Math.floor(Math.random() * 1e10);
+
+            var newCode = '<div id="'+id+'"></div>\x3Cscript type="text/javascript">HPage.loadPage("' + code + '","'+id+'");\x3C/script>';
             str = str.slice(0, sidx) + newCode + str.slice(eidx + EMARKER_LEN);
         }
         return str;
@@ -62,7 +62,7 @@ var HPage = {};
         var pass;
         if (isEnc(divid)) {
             if ((pass = $('#kms-key1').val()).length > 0 && pass === $('#kms-key2').val()) {
-                return CryptoJS.AES.encrypt(text,pass).toString();
+                return CryptoJS.AES.encrypt(text, pass).toString();
             } else {
                 BootstrapDialog.show({
                     type: BootstrapDialog.TYPE_WARNING,
@@ -101,9 +101,9 @@ var HPage = {};
 
         // someone is trying access file outside the safe zone
         // need to check password
-        if (divid.indexOf('..')>=0 || divid.indexOf('/')==0) {
+        if (divid.indexOf('..') >= 0 || divid.indexOf('/') == 0) {
             pass = $('#kms-password').val();
-            data.password = (pass?pass:"");
+            data.password = (pass ? pass : "");
         }
 
         console.log("Loading " + data.file + " ... ");
@@ -235,7 +235,7 @@ var HPage = {};
             } else {
                 return undefined;
             }
-        } catch(e) {
+        } catch (e) {
             return undefined;
         }
     }
@@ -253,206 +253,190 @@ var HPage = {};
             } else {
                 return identity;
             }
-        } catch(e) {
+        } catch (e) {
             return identity;
         }
     }
 
     var encString = "***x***";
 
-    module.loadPage = function (divid, nopreview, previous) {
-        var isBoxed = false;
-        var oldDivid = divid, tmp;
-        divid = removeSquare(oldDivid);
-        if (divid !== oldDivid) {
-            isBoxed = true;
-        }
+    module.loadPage = function (divid, parent, nopreview) {
+        var parser = getParser(divid);
 
-        tmp = $('#' + sanitize(divid));
-        if (!tmp.length) {
-            tmp = $('<div></div>');
-            tmp.attr('id', divid);
-            if (previous !== undefined) {
-                $('#'+sanitize(previous)).after(tmp);
-            } else {
-                $('script').last().after(tmp);
-            }
-        }
-
-        if (!$('#' + sanitize(divid + '.top')).length) {
-            var parser = getParser(divid);
-
-            var $div = $('\x3Cdiv id="' + divid + '.top" ' + (isBoxed ? 'class="panel panel-default"' : '') + ' style="padding: 1em;">\x3C/div>');
-            tmp.append($div);
+        var $div;
+        $div  = $('<div></div>');
+        $('#' + sanitize(parent)).empty().append($div);
 
 
-            var $buttonEdit = $('<span id="' + divid + '.edit" class="glyphicon glyphicon-edit pull-right" style="padding-right: 5px;"></span>');
-            var $buttonRemove = $('<span id="' + divid + '.remove" class="glyphicon glyphicon-trash pull-right" style="padding-right: 5px;"></span>');
-            var $buttonSave = $('<span id="' + divid + '.save" class="glyphicon glyphicon-check pull-right" style="padding-right: 5px;"></span>');
-            var $buttonCancel = $('<span id="' + divid + '.cancel" class="glyphicon glyphicon-remove-circle pull-right" style="padding-right: 5px;"></span>');
+        var $buttonEdit = $('<span class="glyphicon glyphicon-edit pull-right" style="padding: 2px;"></span>');
+        var $buttonRemove = $('<span class="glyphicon glyphicon-trash pull-right" style="padding: 2px;"></span>');
+        var $buttonSave = $('<span class="glyphicon glyphicon-check pull-right" style="padding: 2px;"></span>');
+        var $buttonCancel = $('<span class="glyphicon glyphicon-remove-circle pull-right" style="padding: 2px;"></span>');
 
-            $div.append($buttonCancel);
-            $buttonCancel.hide();
-            $div.append($buttonSave);
-            $buttonSave.hide();
-            $div.append($buttonRemove);
-            $div.append($buttonEdit);
+        $div.append($buttonCancel);
+        $buttonCancel.hide();
+        $div.append($buttonSave);
+        $buttonSave.hide();
+        $div.append($buttonRemove);
+        $div.append($buttonEdit);
 
-            $div.append($('<br>'));
+        $div.append($('<br>'));
 
-            var $divtext = $('<textarea id="' + divid + '.text"></textarea>');
-            $div.append($divtext);
-            $divtext.hide();
+        var $divtext = $('<textarea></textarea>');
+        $div.append($divtext);
+        $divtext.hide();
 
-            var $divhtml = $('\x3Cdiv id = "' + divid + '.html" >\x3C/div>');
+        var $divhtml;
+
+        if(!nopreview) {
+            $divhtml = $('\x3Cdiv>\x3C/div>');
             $div.append($divhtml);
-            if (!nopreview) $divhtml.html('Loading content ...');
+        }
+        if (!nopreview) $divhtml.html('Loading content ...');
 
-            var editor;
+        var editor;
 
-            load(divid, function (content) {
-                if (content === false) {
-                    content = "No content";
-                }
-                if (content === null) {
-                    content = encString;
-                }
-                $divtext.data('raw', content);
-                if (!nopreview) $divhtml.html(parser(content));
-            });
+        function switchToPreview() {
+            $buttonEdit.show();
+            $buttonRemove.show();
+            $buttonSave.hide();
+            $buttonCancel.hide();
 
-            function switchToPreview() {
-                $buttonEdit.show();
-                $buttonRemove.show();
-                $buttonSave.hide();
-                $buttonCancel.hide();
+            editor.toTextArea();
+            $divtext.hide();
+            editor = undefined;
+        }
 
-                editor.toTextArea();
-                $divtext.hide();
-                editor = undefined;
-            }
-
-            function saveAction(e) {
-                var content = editor.getValue();
-                var oldContent = $divtext.data('raw');
-                if (content !== oldContent) {
-                    save(divid, content, function (content) {
-                        $divtext.data('raw', content);
-                        if (!nopreview) $divhtml.html(parser(content));
-                        //if (e !== editor)
-                            switchToPreview();
-                    });
-                } else {
+        function saveAction(e) {
+            var content = editor.getValue();
+            var oldContent = $divtext.data('raw');
+            if (content !== oldContent) {
+                save(divid, content, function (content) {
+                    $divtext.data('raw', content);
+                    if (!nopreview) $divhtml.html(parser(content));
                     //if (e !== editor)
-                        switchToPreview();
-                }
-            }
-
-            $buttonEdit.click(function () {
-                if ($divtext.data('raw')!==encString) {
-                    $buttonSave.show();
-                    $buttonCancel.show();
-                    $buttonEdit.hide();
-                    $buttonRemove.hide();
-                    editor = CodeMirror.fromTextArea($divtext[0], {
-                        mode: getMode(divid),
-                        theme: "default",
-                        lineWrapping: true,
-                        extraKeys: {
-                            "Ctrl-Enter": function (cm) {
-                                cm.setOption("fullScreen", !cm.getOption("fullScreen"));
-                            },
-                            "Esc": function (cm) {
-                                if (cm.getOption("fullScreen")) cm.setOption("fullScreen", false);
-                            },
-                            "Ctrl-s": saveAction
-                        }
-                    });
-                    editor.setValue($divtext.data('raw'));
-                } else {
-                    BootstrapDialog.show({
-                        type: BootstrapDialog.TYPE_WARNING,
-                        title: 'Warning',
-                        message: 'Cannot edit encrypted data before decryption.'
-                    });
-
-                }
-            });
-
-            $buttonSave.click(saveAction);
-
-            $buttonRemove.click(function () {
-                    BootstrapDialog.show({
-                        title: 'Delete',
-                        message: 'Really delete '+divid+'?',
-                        buttons: [{
-                            label: 'Delete',
-                            action: function (dialog) {
-                                remove(divid, function (content) {
-                                    $divtext.data('raw', content);
-                                    if (!nopreview) $divhtml.html(parser(content));
-                                    dialog.close();
-                                });
-                            }
-                        }, {
-                            label: 'Cancel',
-                            action: function (dialog) {
-                                dialog.close();
-                            }
-                        }]
-                    });
-                }
-            );
-
-            $buttonCancel.click(function () {
-                var content = editor.getValue();
-                var oldContent = $divtext.data('raw');
-                if (content === oldContent) {
                     switchToPreview();
-                } else {
-                    BootstrapDialog.show({
-                        type: BootstrapDialog.TYPE_WARNING,
-                        title: 'Close',
-                        message: 'Content modified. Really close?',
-                        buttons: [{
-                            label: 'Close',
-                            action: function (dialog) {
+                });
+            } else {
+                //if (e !== editor)
+                switchToPreview();
+            }
+        }
+
+        $buttonEdit.click(function () {
+            if ($divtext.data('raw') !== encString) {
+                $buttonSave.show();
+                $buttonCancel.show();
+                $buttonEdit.hide();
+                $buttonRemove.hide();
+                editor = CodeMirror.fromTextArea($divtext[0], {
+                    mode: getMode(divid),
+                    theme: "default",
+                    lineWrapping: true,
+                    extraKeys: {
+                        "Ctrl-Enter": function (cm) {
+                            cm.setOption("fullScreen", !cm.getOption("fullScreen"));
+                        },
+                        "Esc": function (cm) {
+                            if (cm.getOption("fullScreen")) cm.setOption("fullScreen", false);
+                        },
+                        "Ctrl-s": saveAction
+                    }
+                });
+                editor.setValue($divtext.data('raw'));
+            } else {
+                BootstrapDialog.show({
+                    type: BootstrapDialog.TYPE_WARNING,
+                    title: 'Warning',
+                    message: 'Cannot edit encrypted data before decryption.'
+                });
+
+            }
+        });
+
+        $buttonSave.click(saveAction);
+
+        $buttonRemove.click(function () {
+                BootstrapDialog.show({
+                    title: 'Delete',
+                    message: 'Really delete ' + divid + '?',
+                    buttons: [{
+                        label: 'Delete',
+                        action: function (dialog) {
+                            remove(divid, function (content) {
+                                $divtext.data('raw', content);
+                                if (!nopreview) $divhtml.html(parser(content));
                                 dialog.close();
-                                switchToPreview();
-                            }
-                        }, {
-                            label: 'Cancel',
-                            action: function (dialog) {
-                                dialog.close();
-                            }
-                        }]
-                    });
-                }
-            });
+                            });
+                        }
+                    }, {
+                        label: 'Cancel',
+                        action: function (dialog) {
+                            dialog.close();
+                        }
+                    }]
+                });
+            }
+        );
+
+        $buttonCancel.click(function () {
+            var content = editor.getValue();
+            var oldContent = $divtext.data('raw');
+            if (content === oldContent) {
+                switchToPreview();
+            } else {
+                BootstrapDialog.show({
+                    type: BootstrapDialog.TYPE_WARNING,
+                    title: 'Close',
+                    message: 'Content modified. Really close?',
+                    buttons: [{
+                        label: 'Close',
+                        action: function (dialog) {
+                            dialog.close();
+                            switchToPreview();
+                        }
+                    }, {
+                        label: 'Cancel',
+                        action: function (dialog) {
+                            dialog.close();
+                        }
+                    }]
+                });
+            }
+        });
+
+        load(divid, function (content) {
+            if (content === false) {
+                content = "No content";
+            }
+            if (content === null) {
+                content = encString;
+            }
+            $divtext.data('raw', content);
+            if (!nopreview) $divhtml.html(parser(content));
+        });
+
+
+    };
+
+    module.anchorLoadDefault = '';
+
+    module.anchorLoad = function () {
+        var hash = window.location.hash;
+        if (hash === '') {
+            hash = module.anchorLoadDefault;
+        }
+        console.log("Hashchange "+hash);
+        if (hash !== '') {
+            hash = hash.substring(2);
+            var divs = hash.split('&');
+            module.loadPage(divs[0], divs[1]);
+            return divs[0];
         }
     };
 
-    module.loadLastDivPage = function () {
-        var currentScript = $('script').last();
-        var divid = currentScript.prev().attr('id');
-        module.loadPage(divid);
-    };
 
-
-    module.unloadPage = function (divid) {
-        divid = removeSquare(divid);
-        var tmp = $('#' + sanitize(divid + '.top'));
-        if (tmp.length) {
-            tmp.remove();
-        }
-    }
-
-    module.toggleCollapse = function(str) {
-        var $collapse = $('#'+sanitize(str));
-        $collapse.collapse('toggle');
-    };
-
-    module.initUploader = function() {
+    module.initUploader = function () {
         $("#kms-drop-area-div").dmUploader({
             url: HPage.URL,
             extraData: {
@@ -471,13 +455,21 @@ var HPage = {};
                 console.log('Server response was:');
                 console.log(data);
                 BootstrapDialog.show({
-                    message: 'Successfully uploaded '+ JSON.parse(data).data
+                    message: 'Successfully uploaded ' + JSON.parse(data).data
                 });
             },
             onComplete: function () {
                 console.log('We reach the end of the upload Queue!');
             }
         });
-    }
+    };
+
+    module.sanitize = sanitize;
+
+    $(window).bind('hashchange', module.anchorLoad).trigger('hashchange');
+
+//    HPage.loadPage(pagemd, false, 'ks-body');
+//    $(".nav").find(".active").removeClass("active");
+//    $('#ks-nav-'+HPage.sanitize(pagemd)).addClass("active");
 
 }(HPage));
