@@ -1,6 +1,5 @@
 var HPage = {};
 (function (module) {
-    module.URL = "https://apps.eecs.berkeley.edu/~ksen/readwrite.php";
 
     var markdown = new Showdown.converter();
 
@@ -114,13 +113,15 @@ var HPage = {};
             dataType: 'json',
             success: function (result) {
                 if (result.data === false) {
-                    err();
+                    promise(result.data);
                 } else {
                     promise(tmp = decrypt(divid, result.data, key));
                     console.log("Success");
                 }
             },
-            error: err
+            error: function() {
+                err();
+            }
         })
     }
 
@@ -275,7 +276,7 @@ var HPage = {};
 
     var encString = "***x***";
 
-    module.loadPage = function (divid, parent, nopreview) {
+    function loadPage(divid, parent, nopreview) {
         var parser = getParser(divid);
 
         var $div;
@@ -348,6 +349,10 @@ var HPage = {};
                     mode: getMode(divid),
                     theme: "default",
                     lineWrapping: true,
+                    matchBrackets: true,
+                    selectionPointer: true,
+                    indentUnit: 4,
+                    indentWithTabs: true,
                     extraKeys: {
                         "Ctrl-Enter": function (cm) {
                             cm.setOption("fullScreen", !cm.getOption("fullScreen"));
@@ -432,18 +437,18 @@ var HPage = {};
         }, $('#kms-password').val(), $('#kms-key1').val());
 
 
-    };
+    }
 
     var currentAnchorMap = {};
     var anchorLoadDefault = '';
 
-    module.setAnchorLoadDefault = function(s) {
+    function setAnchorLoadDefault(s) {
         currentAnchorMap = {};
         anchorLoadDefault = s;
-    };
+    }
 
 
-    module.anchorLoadChange = function () {
+    function anchorLoadChange() {
         var hash = window.location.hash, k;
         if (hash === '') {
             hash = anchorLoadDefault;
@@ -461,7 +466,7 @@ var HPage = {};
             for (k in anchorMap) {
                 if (anchorMap.hasOwnProperty(k)) {
                     if (currentAnchorMap[k] !== anchorMap[k]) {
-                        module.loadPage(anchorMap[k], k);
+                        loadPage(anchorMap[k], k);
                     }
                 }
             }
@@ -472,10 +477,10 @@ var HPage = {};
             }
             currentAnchorMap = anchorMap;
         }
-    };
+    }
 
 
-    module.initUploader = function () {
+    function initUploader() {
         $("#kms-drop-area-div").dmUploader({
             url: HPage.URL,
             extraData: {
@@ -509,14 +514,21 @@ var HPage = {};
                 console.log('We reach the end of the upload Queue!');
             }
         });
-    };
+    }
+    module.initUploader = initUploader;
 
+
+
+    //*********************************
+    // API
+    //*********************************
+    module.loadPage = loadPage;
+    module.setAnchorLoadDefault = setAnchorLoadDefault;
+    module.anchorLoadChange = anchorLoadChange;
     module.sanitize = sanitize;
+    module.URL = "https://apps.eecs.berkeley.edu/~ksen/readwrite.php";
 
-    $(window).bind('hashchange', module.anchorLoadChange).trigger('hashchange');
 
-//    HPage.loadPage(pagemd, false, 'ks-body');
-//    $(".nav").find(".active").removeClass("active");
-//    $('#ks-nav-'+HPage.sanitize(pagemd)).addClass("active");
+    $(window).bind('hashchange', anchorLoadChange).trigger('hashchange');
 
 }(HPage));
