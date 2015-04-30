@@ -283,10 +283,10 @@ var HPage = {};
         $('#' + sanitize(parent)).empty().append($div);
 
 
-        var $buttonEdit = $('<span class="glyphicon glyphicon-edit pull-right" style="padding: 2px;"></span>');
-        var $buttonRemove = $('<span class="glyphicon glyphicon-trash pull-right" style="padding: 2px;"></span>');
-        var $buttonSave = $('<span class="glyphicon glyphicon-check pull-right" style="padding: 2px;"></span>');
-        var $buttonCancel = $('<span class="glyphicon glyphicon-remove-circle pull-right" style="padding: 2px;"></span>');
+        var $buttonEdit = $('<span class="glyphicon glyphicon-edit pull-right" style="padding: 2px; z-index: 10000;"></span>');
+        var $buttonRemove = $('<span class="glyphicon glyphicon-trash pull-right" style="padding: 2px; z-index: 10000;"></span>');
+        var $buttonSave = $('<span class="glyphicon glyphicon-check pull-right" style="padding: 2px; z-index: 10000;"></span>');
+        var $buttonCancel = $('<span class="glyphicon glyphicon-remove-circle pull-right" style="padding: 2px; z-index: 10000;"></span>');
 
         $div.append($buttonCancel);
         $buttonCancel.hide();
