@@ -219,6 +219,11 @@ var HPage = {};
             mode: 'css', converter: function (str) {
                 return '\x3Cstyle type = "text/css" > ' + str + '\x3Cstyle>';
             }
+        },
+        '.php': {
+            mode: "application/x-httpd-php", converter: function (str) {
+                return '<code> ' + str + '</code>';
+            }
         }
     };
 

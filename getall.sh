@@ -19,6 +19,10 @@ wget https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.2.0/mode/javascript/jav
 wget https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.2.0/mode/xml/xml.min.js
 wget https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.2.0/mode/htmlembedded/htmlembedded.min.js
 wget https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.2.0/addon/display/fullscreen.min.js
+wget https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.2.0/mode/clike/clike.min.js
+wget https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.2.0/mode/php/php.min.js
+wget https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.2.0/addon/edit/matchbrackets.min.js
+wget https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.2.0/addon/selection/selection-pointer.min.js
 wget https://cdnjs.cloudflare.com/ajax/libs/showdown/0.5.0/showdown.min.js
 wget http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/aes.js
 wget -O creole.js http://sourceforge.net/p/jscreole/code/HEAD/tree/creole.js?format=raw
