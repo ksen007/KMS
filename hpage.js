@@ -58,11 +58,10 @@ var HPage = {};
         return false;
     }
 
-    function encrypt(divid, text) {
-        var pass;
+    function encrypt(divid, text, key1, key2) {
         if (isEnc(divid)) {
-            if ((pass = $('#kms-key1').val()).length > 0 && pass === $('#kms-key2').val()) {
-                return CryptoJS.AES.encrypt(text, pass).toString();
+            if (key1.length > 0 && key1 === key2) {
+                return CryptoJS.AES.encrypt(text, key1).toString();
             } else {
                 BootstrapDialog.show({
                     type: BootstrapDialog.TYPE_WARNING,
@@ -76,11 +75,10 @@ var HPage = {};
         }
     }
 
-    function decrypt(divid, text) {
-        var pass;
+    function decrypt(divid, text, key) {
         if (isEnc(divid)) {
-            if ((pass = $('#kms-key1').val()).length > 0) {
-                var decrypted = CryptoJS.AES.decrypt(text, pass);
+            if (key.length > 0) {
+                var decrypted = CryptoJS.AES.decrypt(text, key);
                 if (decrypted.sigBytes <= 0) {
                     console.log("Decryption failed.");
                     return null;
@@ -95,12 +93,18 @@ var HPage = {};
         }
     }
 
-    function load(divid, promise) {
-        var tmp, pass;
-        var data = {'file': divid, 'action': 'read'};
+    function load(divid, promise, pass, key) {
+        var tmp;
+        var data = {'file': divid, 'action': 'read', 'password': pass};
 
-        pass = $('#kms-password').val();
-        data.password = (pass ? pass : "");
+        function err() {
+            BootstrapDialog.show({
+                type: BootstrapDialog.TYPE_WARNING,
+                title: 'Error',
+                message: 'Cannot read ' + data.file
+            });
+            console.log("Error");
+        }
 
         console.log("Loading " + data.file + " ... ");
         $.ajax({
@@ -109,22 +113,28 @@ var HPage = {};
             data: data,
             dataType: 'json',
             success: function (result) {
-                promise(tmp = decrypt(divid, result['data']));
-                console.log("Success");
+                if (result.data === false) {
+                    err();
+                } else {
+                    promise(tmp = decrypt(divid, result.data, key));
+                    console.log("Success");
+                }
             },
-            error: function () {
-                BootstrapDialog.show({
-                    type: BootstrapDialog.TYPE_WARNING,
-                    title: 'Error',
-                    message: 'Cannot read ' + data.file
-                });
-                console.log("Error");
-            }
+            error: err
         })
     }
 
-    function remove(divid, promise) {
-        var data = {'file': divid, 'action': 'remove', 'password': $('#kms-password').val()};
+    function remove(divid, promise, pass) {
+        var data = {'file': divid, 'action': 'remove', 'password': pass};
+
+        function err() {
+            BootstrapDialog.show({
+                type: BootstrapDialog.TYPE_WARNING,
+                title: 'Error',
+                message: 'Cannot remove ' + data.file
+            });
+            console.log("Error");
+        }
 
         console.log("Removing " + data.file + " ... ");
         $.ajax({
@@ -133,25 +143,32 @@ var HPage = {};
             data: data,
             dataType: 'json',
             success: function (result) {
-                promise('No content');
-                console.log("Success");
+                if (result.data === false) {
+                    err();
+                } else {
+                    promise('No content');
+                    console.log("Success");
+                }
             },
-            error: function () {
-                BootstrapDialog.show({
-                    type: BootstrapDialog.TYPE_WARNING,
-                    title: 'Error',
-                    message: 'Cannot remove ' + data.file
-                });
-                console.log("Error");
-            }
+            error: err
         })
     }
 
-    function save(file, content, promise) {
-        var econtent = encrypt(file, content);
+    function save(file, content, promise, pass, key1, key2) {
+        var econtent = encrypt(file, content, key1, key2);
 
         if (content !== null) {
-            var data = {file: file, content: econtent, action: 'write', 'password': $('#kms-password').val()};
+            var data = {file: file, content: econtent, action: 'write', password: pass};
+
+            function err() {
+                BootstrapDialog.show({
+                    type: BootstrapDialog.TYPE_WARNING,
+                    title: 'Error',
+                    message: 'Cannot save ' + data.file
+                });
+                console.log("Error");
+            }
+
             console.log("Saving " + file + " ... ");
             $.ajax({
                 url: module.URL,
@@ -159,18 +176,15 @@ var HPage = {};
                 data: data,
                 dataType: 'json',
                 success: function (result) {
-                    console.log("Success");
-                    console.log(result['data']);
-                    promise(content);
+                    if (result.data===false) {
+                        err();
+                    } else {
+                        console.log("Success");
+                        console.log(result['data']);
+                        promise(content);
+                    }
                 },
-                error: function () {
-                    BootstrapDialog.show({
-                        type: BootstrapDialog.TYPE_WARNING,
-                        title: 'Error',
-                        message: 'Cannot save ' + data.file
-                    });
-                    console.log("Error");
-                }
+                error: err
             })
         }
     }
@@ -317,7 +331,7 @@ var HPage = {};
                     if (!nopreview) $divhtml.html(parser(content));
                     //if (e !== editor)
                     switchToPreview();
-                });
+                }, $('#kms-password').val(), $('#kms-key1').val(), $('#kms-key2').val());
             } else {
                 //if (e !== editor)
                 switchToPreview();
@@ -368,7 +382,7 @@ var HPage = {};
                                 $divtext.data('raw', content);
                                 if (!nopreview) $divhtml.html(parser(content));
                                 dialog.close();
-                            });
+                            }, $('#kms-password').val());
                         }
                     }, {
                         label: 'Cancel',
@@ -415,7 +429,7 @@ var HPage = {};
             }
             $divtext.data('raw', content);
             if (!nopreview) $divhtml.html(parser(content));
-        });
+        }, $('#kms-password').val(), $('#kms-key1').val());
 
 
     };
@@ -476,12 +490,20 @@ var HPage = {};
                 console.log('Plugin successfully initialized');
             },
             onUploadSuccess: function (id, data) {
-                console.log('Succefully upload #' + id);
-                console.log('Server response was:');
-                console.log(data);
-                BootstrapDialog.show({
-                    message: 'Successfully uploaded ' + JSON.parse(data).data
-                });
+                var outcome = JSON.parse(data).data;
+                if (outcome) {
+                    console.log('Successfully upload #' + id);
+                    console.log('Server response was:');
+                    console.log(data);
+                    BootstrapDialog.show({
+                        message: 'Successfully uploaded. '
+                    });
+                } else {
+                    BootstrapDialog.show({
+                        type: BootstrapDialog.TYPE_WARNING,
+                        message: 'Upload failed. '
+                    });
+                }
             },
             onComplete: function () {
                 console.log('We reach the end of the upload Queue!');
