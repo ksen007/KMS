@@ -415,19 +415,43 @@ var HPage = {};
 
     };
 
-    module.anchorLoadDefault = '';
+    var currentAnchorMap = {};
+    var anchorLoadDefault = '';
 
-    module.anchorLoad = function () {
-        var hash = window.location.hash;
+    module.setAnchorLoadDefault = function(s) {
+        currentAnchorMap = {};
+        anchorLoadDefault = s;
+    };
+
+
+    module.anchorLoadChange = function () {
+        var hash = window.location.hash, k;
         if (hash === '') {
-            hash = module.anchorLoadDefault;
+            hash = anchorLoadDefault;
         }
         console.log("Hashchange "+hash);
-        if (hash !== '') {
+        if (hash.indexOf('#!')==0) {
             hash = hash.substring(2);
-            var divs = hash.split('&');
-            module.loadPage(divs[0], divs[1]);
-            return divs[0];
+            var anchorMap = {};
+            var kvs = hash.split('&');
+            for (var i = 0; i < kvs.length; i++) {
+                var kv = kvs[i].split('=');
+                anchorMap[kv[0]] = kv[1];
+            }
+
+            for (k in anchorMap) {
+                if (anchorMap.hasOwnProperty(k)) {
+                    if (currentAnchorMap[k] !== anchorMap[k]) {
+                        module.loadPage(anchorMap[k], k);
+                    }
+                }
+            }
+            for(k in currentAnchorMap) {
+                if (currentAnchorMap.hasOwnProperty(k) && !anchorMap.hasOwnProperty(k)) {
+                    $('#'+sanitize(k)).empty();
+                }
+            }
+            currentAnchorMap = anchorMap;
         }
     };
 
@@ -462,7 +486,7 @@ var HPage = {};
 
     module.sanitize = sanitize;
 
-    $(window).bind('hashchange', module.anchorLoad).trigger('hashchange');
+    $(window).bind('hashchange', module.anchorLoadChange).trigger('hashchange');
 
 //    HPage.loadPage(pagemd, false, 'ks-body');
 //    $(".nav").find(".active").removeClass("active");
