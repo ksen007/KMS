@@ -79,7 +79,7 @@ var HPage = {};
     function decrypt(divid, text) {
         var pass;
         if (isEnc(divid)) {
-            if ((pass = $('#kms-key1').val()).length > 0 && pass === $('#kms-key2').val()) {
+            if ((pass = $('#kms-key1').val()).length > 0) {
                 var decrypted = CryptoJS.AES.decrypt(text, pass);
                 if (decrypted.sigBytes <= 0) {
                     console.log("Decryption failed.");
@@ -99,12 +99,8 @@ var HPage = {};
         var tmp, pass;
         var data = {'file': divid, 'action': 'read'};
 
-        // someone is trying access file outside the safe zone
-        // need to check password
-        if (divid.indexOf('..') >= 0 || divid.indexOf('/') == 0) {
-            pass = $('#kms-password').val();
-            data.password = (pass ? pass : "");
-        }
+        pass = $('#kms-password').val();
+        data.password = (pass ? pass : "");
 
         console.log("Loading " + data.file + " ... ");
         $.ajax({
