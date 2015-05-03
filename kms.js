@@ -92,6 +92,23 @@ var HPage = {};
         }
     }
 
+    function getPass(id) {
+        var currVal = $('#'+sanitize(id)).val();
+        if (currVal !== undefined && currVal.length > 0) {
+            localStorage.setItem(id, CryptoJS.AES.encrypt(currVal, id));
+            return currVal;
+        } else {
+            var oldVal = localStorage.getItem(id);
+            if (oldVal) {
+                var pass = CryptoJS.AES.decrypt(oldVal, id);
+                if (pass.sigBytes > 0) {
+                    return pass.toString(CryptoJS.enc.Utf8);
+                }
+            }
+            return currVal;
+        }
+    }
+
     function load(divid, promise, pass, key) {
         var tmp;
         var data = {'file': divid, 'action': 'read', 'password': pass};
@@ -336,14 +353,15 @@ var HPage = {};
                     if (!nopreview) $divhtml.html(parser(content));
                     //if (e !== editor)
                     switchToPreview();
-                }, $('#kms-password').val(), $('#kms-key1').val(), $('#kms-key2').val());
+                }, getPass('kms-password'), getPass('kms-key1'), getPass('kms-key2'));
             } else {
                 //if (e !== editor)
                 switchToPreview();
             }
         }
 
-        $buttonEdit.click(function () {
+
+        function editAction() {
             if ($divtext.data('raw') !== encString) {
                 $buttonSave.show();
                 $buttonCancel.show();
@@ -376,7 +394,9 @@ var HPage = {};
                 });
 
             }
-        });
+        }
+
+        $buttonEdit.click(editAction);
 
         $buttonSave.click(saveAction);
 
@@ -391,7 +411,7 @@ var HPage = {};
                                 $divtext.data('raw', content);
                                 if (!nopreview) $divhtml.html(parser(content));
                                 dialog.close();
-                            }, $('#kms-password').val());
+                            }, getPass('kms-password'));
                         }
                     }, {
                         label: 'Cancel',
@@ -438,7 +458,8 @@ var HPage = {};
             }
             $divtext.data('raw', content);
             if (!nopreview) $divhtml.html(parser(content));
-        }, $('#kms-password').val(), $('#kms-key1').val());
+            if (nopreview) editAction();
+        }, getPass('kms-password'), getPass('kms-key1'));
 
 
     }
@@ -489,9 +510,9 @@ var HPage = {};
             url: HPage.URL,
             extraData: {
                 'action': 'upload', get directory() {
-                    return $('#kms-file').val()
+                    return $('#kms-file').val();
                 }, get password() {
-                    return $('#kms-password').val()
+                    return getPass('kms-password');
                 }
             },
             fileName: 'uploaded',
