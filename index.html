@@ -37,6 +37,7 @@
             border: 1px solid black;
             height: auto;
         }
+
         .glyphicon {
             opacity: 0.2;
         }
@@ -102,13 +103,15 @@
 
 <div id="kms-top-div"></div>
 <script type="text/javascript">
-    HPage.loadPage("hpage/index.html","kms-top-div");
+    HPage.URL = "https://apps.eecs.berkeley.edu/~ksen/readwrite.php";
+    HPage.loadPage("hpage/index.html", "kms-top-div");
 </script>
 
 <div class="container" style="z-index: 10000;">
     <a data-toggle="collapse" href="#kms-collapse">
         <span class="glyphicon glyphicon-plus"></span>
     </a>
+
     <div class="row">
         <div id="kms-collapse" class="collapse">
             <div class="form-group col-md-2">
@@ -133,7 +136,7 @@
             </div>
             <div class="col-md-2">
                 <span onclick="HPage.loadPage($('#kms-file').val(),'kms-main-edit', true)"
-                   class="glyphicon glyphicon-edit"></span>
+                      class="glyphicon glyphicon-edit"></span>
             </div>
         </div>
     </div>

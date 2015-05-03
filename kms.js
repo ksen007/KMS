@@ -112,8 +112,10 @@ var HPage = {};
             data: data,
             dataType: 'json',
             success: function (result) {
-                if (result.data === false) {
+                if (!result.success) {
                     promise(result.data);
+                    console.log("Failure.");
+                    console.log(result.message);
                 } else {
                     promise(tmp = decrypt(divid, result.data, key));
                     console.log("Success");
@@ -144,7 +146,8 @@ var HPage = {};
             data: data,
             dataType: 'json',
             success: function (result) {
-                if (result.data === false) {
+                if (!result.success) {
+                    console.log(result.message);
                     err();
                 } else {
                     promise('No content');
@@ -177,7 +180,8 @@ var HPage = {};
                 data: data,
                 dataType: 'json',
                 success: function (result) {
-                    if (result.data===false) {
+                    if (!result.success) {
+                        console.log(result.message);
                         err();
                     } else {
                         console.log("Success");
@@ -284,10 +288,10 @@ var HPage = {};
         $('#' + sanitize(parent)).empty().append($div);
 
 
-        var $buttonEdit = $('<span class="glyphicon glyphicon-edit pull-right" style="padding: 2px; z-index: 10000;"></span>');
-        var $buttonRemove = $('<span class="glyphicon glyphicon-trash pull-right" style="padding: 2px; z-index: 10000;"></span>');
-        var $buttonSave = $('<span class="glyphicon glyphicon-check pull-right" style="padding: 2px; z-index: 10000;"></span>');
-        var $buttonCancel = $('<span class="glyphicon glyphicon-remove-circle pull-right" style="padding: 2px; z-index: 10000;"></span>');
+        var $buttonEdit = $('<span class="glyphicon glyphicon-edit pull-right" style="padding: 2px;" title="Edit '+divid+'"></span>');
+        var $buttonRemove = $('<span class="glyphicon glyphicon-trash pull-right" style="padding: 2px;" title="Delete '+divid+'"></span>');
+        var $buttonSave = $('<span class="glyphicon glyphicon-check pull-right" style="padding: 2px;" title="Save '+divid+'"></span>');
+        var $buttonCancel = $('<span class="glyphicon glyphicon-remove-circle pull-right" style="padding: 2px;" title="Cancel edit of '+divid+'"></span>');
 
         $div.append($buttonCancel);
         $buttonCancel.hide();
@@ -495,15 +499,16 @@ var HPage = {};
                 console.log('Plugin successfully initialized');
             },
             onUploadSuccess: function (id, data) {
-                var outcome = JSON.parse(data).data;
+                var outcome = data.success;
                 if (outcome) {
                     console.log('Successfully upload #' + id);
                     console.log('Server response was:');
-                    console.log(data);
+                    console.log(data.message);
                     BootstrapDialog.show({
                         message: 'Successfully uploaded. '
                     });
                 } else {
+                    console.log(data.message);
                     BootstrapDialog.show({
                         type: BootstrapDialog.TYPE_WARNING,
                         message: 'Upload failed. '
