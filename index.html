@@ -50,6 +50,47 @@
 </head>
 <body>
 
+<div id="kms-main"></div>
+<script type="text/javascript">
+    HPage.URL = "https://apps.eecs.berkeley.edu/~ksen/readwrite.php";
+    HPage.loadPage("hpage/index.html", "kms-main");
+</script>
+
+<div class="container" style="z-index: 10000;">
+    <a data-toggle="collapse" href="#kms-collapse">
+        <span class="glyphicon glyphicon-plus"></span>
+    </a>
+
+    <div class="row">
+        <div id="kms-collapse" class="collapse">
+            <div class="form-group col-md-2">
+                <input type="password" id="kms-key1" class="pull-right form-control input-sm" style="padding: 1em;"
+                       placeholder="Enter key for encryption ...">
+            </div>
+            <div class="form-group col-md-2">
+                <input type="password" id="kms-key2" class="pull-right form-control input-sm" style="padding: 1em;"
+                       placeholder="Reenter key for encryption ...">
+            </div>
+            <div class="form-group col-md-2">
+                <input type="password" id="kms-password" class="pull-right form-control input-sm"
+                       style="padding: 1em;"
+                       placeholder="Enter password for editing ...">
+            </div>
+            <div class="form-group col-md-2">
+                <input id="kms-file" class="pull-right form-control input-sm"
+                       style="padding: 1em;">
+            </div>
+            <div id="kms-drop-area-div" class="col-md-2">
+                Drag and Drop Files Here<br/>
+            </div>
+            <div class="col-md-2">
+                <span onclick="HPage.loadPage($('#kms-file').val(),'kms-main-edit', true)"
+                      class="glyphicon glyphicon-edit"></span>
+            </div>
+        </div>
+    </div>
+    <div id="kms-main-edit"></div>
+</div>
 <div class="bibtex_template">
     <dt> [
         <span class="if myconfurl">
@@ -101,47 +142,6 @@
     </dd>
 </div>
 
-<div id="kms-top-div"></div>
-<script type="text/javascript">
-    HPage.URL = "https://apps.eecs.berkeley.edu/~ksen/readwrite.php";
-    HPage.loadPage("hpage/index.html", "kms-top-div");
-</script>
-
-<div class="container" style="z-index: 10000;">
-    <a data-toggle="collapse" href="#kms-collapse">
-        <span class="glyphicon glyphicon-plus"></span>
-    </a>
-
-    <div class="row">
-        <div id="kms-collapse" class="collapse">
-            <div class="form-group col-md-2">
-                <input type="password" id="kms-key1" class="pull-right form-control input-sm" style="padding: 1em;"
-                       placeholder="Enter key for encryption ...">
-            </div>
-            <div class="form-group col-md-2">
-                <input type="password" id="kms-key2" class="pull-right form-control input-sm" style="padding: 1em;"
-                       placeholder="Reenter key for encryption ...">
-            </div>
-            <div class="form-group col-md-2">
-                <input type="password" id="kms-password" class="pull-right form-control input-sm"
-                       style="padding: 1em;"
-                       placeholder="Enter password for editing ...">
-            </div>
-            <div class="form-group col-md-2">
-                <input id="kms-file" class="pull-right form-control input-sm"
-                       style="padding: 1em;">
-            </div>
-            <div id="kms-drop-area-div" class="col-md-2">
-                Drag and Drop Files Here<br/>
-            </div>
-            <div class="col-md-2">
-                <span onclick="HPage.loadPage($('#kms-file').val(),'kms-main-edit', true)"
-                      class="glyphicon glyphicon-edit"></span>
-            </div>
-        </div>
-    </div>
-    <div id="kms-main-edit"></div>
-</div>
 
 <script type="text/javascript">
     HPage.initUploader();
