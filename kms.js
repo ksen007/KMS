@@ -127,8 +127,8 @@ var HPage = {};
             url: module.URL,
             type: 'POST',
             data: data,
-            dataType: 'json',
             success: function (result) {
+                result = $.parseJSON(result);
                 if (!result.success) {
                     promise(result.data);
                     console.log("Failure.");
@@ -138,9 +138,7 @@ var HPage = {};
                     console.log("Success");
                 }
             },
-            error: function() {
-                err();
-            }
+            error: err
         })
     }
 
@@ -161,8 +159,8 @@ var HPage = {};
             url: module.URL,
             type: 'POST',
             data: data,
-            dataType: 'json',
             success: function (result) {
+                result = $.parseJSON(result);
                 if (!result.success) {
                     console.log(result.message);
                     err();
@@ -195,8 +193,8 @@ var HPage = {};
                 url: module.URL,
                 type: 'POST',
                 data: data,
-                dataType: 'json',
                 success: function (result) {
+                    result = $.parseJSON(result);
                     if (!result.success) {
                         console.log(result.message);
                         err();
