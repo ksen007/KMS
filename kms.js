@@ -370,7 +370,6 @@ var HPage = {};
                     theme: "default",
                     lineWrapping: true,
                     matchBrackets: true,
-                    selectionPointer: true,
                     indentUnit: 4,
                     indentWithTabs: true,
                     extraKeys: {
@@ -505,7 +504,7 @@ var HPage = {};
 
     function initUploader() {
         $("#kms-drop-area-div").dmUploader({
-            url: HPage.URL,
+            url: module.URL,
             extraData: {
                 'action': 'upload', get directory() {
                     return $('#kms-file').val();
@@ -518,6 +517,8 @@ var HPage = {};
                 console.log('Plugin successfully initialized');
             },
             onUploadSuccess: function (id, data) {
+                data = $.parseJSON(data);
+
                 var outcome = data.success;
                 if (outcome) {
                     console.log('Successfully upload #' + id);
