@@ -40,7 +40,7 @@ var HPage = {};
             var code = str.substring(sidx + BMARKER_LEN, eidx);
             var id = 'placeholder-' + Math.floor(Math.random() * 1e10);
 
-            var newCode = '<div id="'+id+'"></div>\x3Cscript type="text/javascript">HPage.loadPage("' + code + '","'+id+'");\x3C/script>';
+            var newCode = '<div id="' + id + '"></div>\x3Cscript type="text/javascript">HPage.loadPage("' + code + '","' + id + '");\x3C/script>';
             str = str.slice(0, sidx) + newCode + str.slice(eidx + EMARKER_LEN);
         }
         return str;
@@ -93,7 +93,7 @@ var HPage = {};
     }
 
     function getPass(id) {
-        var currVal = $('#'+sanitize(id)).val();
+        var currVal = $('#' + sanitize(id)).val();
         if (currVal !== undefined && currVal.length > 0) {
             localStorage.setItem(id, CryptoJS.AES.encrypt(currVal, id));
             return currVal;
@@ -124,19 +124,11 @@ var HPage = {};
 
         console.log("Loading " + data.file + " ... ");
         $.ajax({
-            url: module.URL,
-            type: 'POST',
-            data: data,
+            url: divid,
+            type: 'GET',
             success: function (result) {
-                result = $.parseJSON(result);
-                if (!result.success) {
-                    promise(result.data);
-                    console.log("Failure.");
-                    console.log(result.message);
-                } else {
-                    promise(tmp = decrypt(divid, result.data, key));
-                    console.log("Success");
-                }
+                promise(tmp = decrypt(divid, result, key));
+                console.log("Success");
             },
             error: err
         })
@@ -299,14 +291,14 @@ var HPage = {};
         var parser = getParser(divid);
 
         var $div;
-        $div  = $('<div></div>');
+        $div = $('<div></div>');
         $('#' + sanitize(parent)).empty().append($div);
 
 
-        var $buttonEdit = $('<span class="glyphicon glyphicon-edit pull-right" style="padding: 2px;" title="Edit '+divid+'"></span>');
-        var $buttonRemove = $('<span class="glyphicon glyphicon-trash pull-right" style="padding: 2px;" title="Delete '+divid+'"></span>');
-        var $buttonSave = $('<span class="glyphicon glyphicon-check pull-right" style="padding: 2px;" title="Save '+divid+'"></span>');
-        var $buttonCancel = $('<span class="glyphicon glyphicon-remove-circle pull-right" style="padding: 2px;" title="Cancel edit of '+divid+'"></span>');
+        var $buttonEdit = $('<span class="glyphicon glyphicon-edit pull-right" style="padding: 2px;" title="Edit ' + divid + '"></span>');
+        var $buttonRemove = $('<span class="glyphicon glyphicon-trash pull-right" style="padding: 2px;" title="Delete ' + divid + '"></span>');
+        var $buttonSave = $('<span class="glyphicon glyphicon-check pull-right" style="padding: 2px;" title="Save ' + divid + '"></span>');
+        var $buttonCancel = $('<span class="glyphicon glyphicon-remove-circle pull-right" style="padding: 2px;" title="Cancel edit of ' + divid + '"></span>');
 
         $div.append($buttonCancel);
         $buttonCancel.hide();
@@ -323,7 +315,7 @@ var HPage = {};
 
         var $divhtml;
 
-        if(!nopreview) {
+        if (!nopreview) {
             $divhtml = $('\x3Cdiv>\x3C/div>');
             $div.append($divhtml);
         }
@@ -475,8 +467,8 @@ var HPage = {};
         if (hash === '') {
             hash = anchorLoadDefault;
         }
-        console.log("Hashchange "+hash);
-        if (hash.indexOf('#!')==0) {
+        console.log("Hashchange " + hash);
+        if (hash.indexOf('#!') == 0) {
             hash = hash.substring(2);
             var anchorMap = {};
             var kvs = hash.split('&');
@@ -492,9 +484,9 @@ var HPage = {};
                     }
                 }
             }
-            for(k in currentAnchorMap) {
+            for (k in currentAnchorMap) {
                 if (currentAnchorMap.hasOwnProperty(k) && !anchorMap.hasOwnProperty(k)) {
-                    $('#'+sanitize(k)).empty();
+                    $('#' + sanitize(k)).empty();
                 }
             }
             currentAnchorMap = anchorMap;
@@ -540,8 +532,8 @@ var HPage = {};
             }
         });
     }
-    module.initUploader = initUploader;
 
+    module.initUploader = initUploader;
 
 
     //*********************************
