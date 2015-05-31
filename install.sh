@@ -27,3 +27,12 @@ wget http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/aes.js
 wget -O creole.js http://sourceforge.net/p/jscreole/code/HEAD/tree/creole.js?format=raw
 wget http://bibtex-js.googlecode.com/svn/trunk/src/bibtex_js.js
 wget https://raw.githubusercontent.com/danielm/uploader/master/src/dmuploader.min.js
+
+cd ..
+rm -rf fonts
+mkdir fonts
+cd fonts
+
+wget https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/fonts/glyphicons-halflings-regular.woff2
+wget https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/fonts/glyphicons-halflings-regular.woff
+wget https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/fonts/glyphicons-halflings-regular.ttf

@@ -3,6 +3,26 @@ var KMS = {};
 
     var modified = false;
     var contents = {};
+    var KMSMAIN = '#kms-main';
+    var pagePrefix;
+    var SEPARATOR = "<!-- KMS Contents -->";
+
+    var markdown = new Showdown.converter();
+
+    var creole = (function () {
+        var creole = new Parse.Simple.Creole();
+        var div = $('<div></div>div>');
+
+        return function (str) {
+            div.html('');
+            creole.parse(div[0], str);
+            return div.html();
+        }
+    }());
+
+    function escapeHtml(string) {
+        return string.replace(/\n|\r\n|\r/g, '<br/>').replace(/ /g, '&nbsp;');
+    }
 
     var plugins = {
         '.txt': {
@@ -13,12 +33,12 @@ var KMS = {};
         },
         '.md': {
             mode: 'markdown', converter: function (str) {
-                return expand(markdown.makeHtml(str));
+                return markdown.makeHtml(str);
             }
         },
         '.wiki': {
             mode: undefined, converter: function (str) {
-                return expand(creole(str));
+                return creole(str);
             }
         },
         '.js': {
@@ -28,7 +48,7 @@ var KMS = {};
         },
         '.html': {
             mode: 'text/html', converter: function (str) {
-                return expand(str);
+                return str;
             }
         },
         '.css': {
@@ -43,18 +63,8 @@ var KMS = {};
         }
     };
 
-    function getMode(divid) {
-        try {
-            var pos = divid.lastIndexOf('.');
-            if (pos >= 0) {
-                var ext = divid.substring(pos);
-                return plugins[ext].mode;
-            } else {
-                return undefined;
-            }
-        } catch (e) {
-            return undefined;
-        }
+    function addPlugin(transformers, mode, converter) {
+        plugins[transformers] = {mode: mode, converter: converter};
     }
 
     function identity(str) {
@@ -93,6 +103,21 @@ var KMS = {};
         }
     }
 
+    function getMode(divid) {
+        try {
+            var pos = divid.lastIndexOf('.');
+            if (pos >= 0) {
+                var ext = divid.substring(pos);
+                return plugins[ext].mode;
+            } else {
+                return undefined;
+            }
+        } catch (e) {
+            return undefined;
+        }
+    }
+
+
     function isEnc(divid) {
         var pos = divid.lastIndexOf('.');
         if (pos >= 0) {
@@ -104,7 +129,14 @@ var KMS = {};
         return false;
     }
 
-    function encrypt(transformers, text, key1, key2) {
+    var encString = "***x***";
+
+    function encrypt(content) {
+        var text = content.data;
+        var transformers = content.transformers;
+        var key1 = getPass('kms-key1');
+        var key2 = getPass('kms-key2');
+
         if (isEnc(transformers)) {
             if (key1.length > 0 && key1 === key2) {
                 return CryptoJS.AES.encrypt(text, key1).toString();
@@ -121,7 +153,11 @@ var KMS = {};
         }
     }
 
-    function decrypt(transformers, text, key) {
+    function decrypt(content) {
+        var text = content.data;
+        var transformers = content.transformers;
+        var key = getPass('kms-key1');
+
         if (isEnc(transformers)) {
             if (key.length > 0) {
                 var decrypted = CryptoJS.AES.decrypt(text, key);
@@ -140,15 +176,176 @@ var KMS = {};
     }
 
 
-    var encString = "***x***";
+    function serializeKmsContent(parent) {
+        var ret = "";
+        var divid = parent.data('default'),
+            transformers = contents[divid].transformers,
+            creation = contents[divid].creation,
+            update = contents[divid].update;
+        var parser = getParser(transformers);
 
-    function loadDivid(divid, transformers, parent, nopreview) {
+        var enc = encrypt(contents[divid]);
+        if (enc === null) {
+            throw new Error("Failed to encrypt");
+        }
+        ret = ret +
+        '\x3Cdiv id="' + divid +
+        '" class="kms-content" data-transformers="' + transformers +
+        '" data-creation-time="' + creation +
+        '" data-update-time="' + update +
+        '">' +
+        enc +
+        '\x3C/div>\n';
+
+        var $divhtml = $('\x3Cdiv>\x3C/div>');
+        $divhtml.html(parser(contents[divid].data));
+        $divhtml.find('.kms-location').each(function (i) {
+            var dis = $(this);
+            ret = ret + serializeKmsContent(dis);
+        });
+        return ret;
+    }
+
+    function serializePage() {
+        var ret = pagePrefix;
+        ret = ret + SEPARATOR + "\n";
+        for (var divid in contents) {
+            if (contents.hasOwnProperty(divid)) {
+                var content = contents[divid];
+                ret = ret +
+                '\x3Cdiv id="' + divid +
+                '" class="kms-content" data-transformers="' + content.transformers +
+                '" data-creation-time="' + content.creation +
+                '" data-update-time="' + content.update +
+                '">' +
+                content.data +
+                '\x3C/div>\n\n<!-- SEPARATOR -->\n';
+            }
+        }
+        ret = ret + '</body>\n</html>\n';
+        return ret;
+    }
+
+    function saveerr(file) {
+        BootstrapDialog.show({
+            type: BootstrapDialog.TYPE_WARNING,
+            title: 'Error',
+            message: 'Cannot save ' + file
+        });
+        console.log("Error");
+    }
+
+
+    function savePageAux(file, str) {
+        var data = {file: file, content: str, action: 'write', password: getPass('kms-password')};
+
+        console.log("Saving " + file + " ... ");
+        $.ajax({
+            url: module.URL,
+            type: 'POST',
+            data: data,
+            success: function (result) {
+                result = $.parseJSON(result);
+                if (!result.success) {
+                    console.log(result.message);
+                    saveerr(file);
+                } else {
+                    console.log("Success");
+                    console.log(result['data']);
+                    BootstrapDialog.show({
+                        message: 'Successfully saved '+data.file
+                    });                }
+            },
+            error: function(){ saveerr(file); }
+        })
+
+    }
+
+    function loadTemplate(promise) {
+        function err() {
+            BootstrapDialog.show({
+                type: BootstrapDialog.TYPE_WARNING,
+                title: 'Error',
+                message: 'Cannot read ' + document.location.href
+            });
+            console.log("Error");
+        }
+
+        $.ajax({
+            url: document.location.href,
+            type: 'GET',
+            success: function (result) {
+                pagePrefix = result.substring(0, result.indexOf(SEPARATOR));
+                promise();
+            },
+            error: err
+        })
+    }
+
+    function savePage2() {
+        var parser = document.createElement('a');
+        parser.href = document.location.href;
+        var file = parser.pathname.substring(1);
+        if (file.indexOf('~')===0) {
+            file = file.substring(file.indexOf('/')+1);
+        }
+
+        var econtent;
+        econtent = serializePage();
+        savePageAux(file, econtent);
+    }
+
+
+    function newPage2() {
+        var ret = pagePrefix;
+        ret = ret + SEPARATOR + "\n";
+        ret = ret + '</body>\n</html>\n';
+        savePageAux($('#kms-file').val(), ret);
+    }
+
+    function savePage() {
+        loadTemplate(savePage2);
+    }
+
+    function newPage() {
+        loadTemplate(newPage2);
+    }
+
+    function loadSubKmsContents(div) {
+        var transformers = div.data('transformers');
+        if (transformers === undefined) {
+            transformers = ".html"
+        }
+        loadKmsContent(div.data('default'), transformers, div);
+    }
+
+    function setContent(parent, divid, $divhtml, parser) {
+        var content = decrypt(contents[divid]);
+        if (content === null) {
+            content = encString;
+        }
+
+        $divhtml.html(parser(content));
+        parent.find('.kms-location').each(function (i) {
+            var dis = $(this);
+            loadSubKmsContents(dis);
+        });
+        parent.find('.kms-script').each(function (i) {
+            var dis = $(this);
+            parent.append($('<script type="text/javascript">'+dis.html()+'</script>'));
+        });
+    }
+
+
+    function loadKmsContent(divid, transformers, parent) {
+        if (divid === undefined) return;
+
         var data = contents[divid];
         if (data === undefined) {
-            data = {data: "No content", transformers: transformers};
+            data = {data: "No content", transformers: transformers, creation: Date.now(), update: Date.now()};
+            contents[divid] = data;
         }
-        contents[divid] = data;
-        transformers = data.transformers;
+        transformers = data.transformers ? data.transformers : transformers;
 
         var parser = getParser(transformers);
 
@@ -169,7 +366,7 @@ var KMS = {};
         $div.append($buttonRemove);
         $div.append($buttonEdit);
 
-        $div.append($('<br>'));
+        $div.append($('<p>'));
 
         var $divtext = $('<textarea></textarea>');
         $div.append($divtext);
@@ -177,21 +374,11 @@ var KMS = {};
 
         var $divhtml;
 
-        if (!nopreview) {
-            $divhtml = $('\x3Cdiv>\x3C/div>');
-            $div.append($divhtml);
-        }
-        if (!nopreview) $divhtml.html('Loading content ...');
+        $divhtml = $('\x3Cdiv>\x3C/div>');
+        $div.append($divhtml);
+        $divhtml.html('Loading content ...');
 
         var editor;
-
-        function setContent(content) {
-            $divhtml.html(parser(content));
-            parent.find('.kms-location').each(function (i) {
-                var dis = $(this);
-                populate(dis);
-            })
-        }
 
         function switchToPreview() {
             $buttonEdit.show();
@@ -211,9 +398,15 @@ var KMS = {};
             if (content !== oldContent) {
                 modified = true;
                 contents[divid].data = content;
-                if (!nopreview) {
-                    setContent(content);
+                contents[divid].update = Date.now();
+                var enc = encrypt(contents[divid]);
+                if (enc === null) {
+                    return;
                 }
+                contents[divid].data = enc;
+
+
+                setContent(parent, divid, $divhtml, parser);
                 switchToPreview();
             } else {
                 switchToPreview();
@@ -253,11 +446,8 @@ var KMS = {};
             }
         }
 
-        $buttonEdit.click(editAction);
-        $buttonSave.click(saveAction);
 
-
-        $buttonCancel.click(function () {
+        function cancelAction() {
             var content = editor.getValue();
             var oldContent = contents[divid].data;
             if (content === oldContent) {
@@ -281,23 +471,21 @@ var KMS = {};
                     }]
                 });
             }
-        });
+        }
 
-        var content = decrypt(divid, data.data, getPass('kms-key1'));
-        if (content === null) {
-            content = encString;
-        }
-        if (!nopreview) {
-            setContent(content);
-        }
-        if (nopreview) editAction();
+        $buttonEdit.click(editAction);
+        $buttonSave.click(saveAction);
+        $buttonCancel.click(cancelAction);
+
+
+        setContent(parent, divid, $divhtml, parser);
     }
 
-    function loadPage(dividtransformers, parent, nopreview) {
+    function loadKmsContentFromTag(dividtransformers, parentDiv) {
         var divid = dividtransformers.substring(0, dividtransformers.indexOf("."));
         var transformers = dividtransformers.substring(dividtransformers.indexOf("."));
-        parent = $('#' + parent);
-        loadDivid(divid, transformers, parent, nopreview);
+        parentDiv = $('#' + parentDiv);
+        loadKmsContent(divid, transformers, parentDiv);
     }
 
     var currentAnchorMap = {};
@@ -327,7 +515,7 @@ var KMS = {};
             for (k in anchorMap) {
                 if (anchorMap.hasOwnProperty(k)) {
                     if (currentAnchorMap[k] !== anchorMap[k]) {
-                        loadPage(anchorMap[k], k);
+                        loadKmsContentFromTag(anchorMap[k], k);
                     }
                 }
             }
@@ -380,18 +568,16 @@ var KMS = {};
         });
     }
 
-    var pagePrefix;
-    var SEPARATOR = "<!-- KMS Contents -->";
-
-    function populate(div) {
-        loadDivid(div.data('default'), div.data('transformers'), div);
-    }
-
     function collectContents() {
         $('.kms-content').each(
             function (i) {
                 var tmp = $(this);
-                contents[this.id] = {data: tmp.html(), transformers: tmp.data('transformers')};
+                contents[this.id] = {
+                    data: tmp.html(),
+                    transformers: tmp.data('transformers'),
+                    creation: tmp.data('creation-time'),
+                    update: tmp.data('update-time')
+                };
             }
         );
     }
@@ -400,20 +586,20 @@ var KMS = {};
     $(document).ready(function () {
             console.log("Populating page");
             initUploader();
-            $(window).bind('hashchange', anchorLoadChange).trigger('hashchange');
             collectContents();
-            pagePrefix = $('html')[0].outerHTML;
-            pagePrefix = pagePrefix.substring(0, pagePrefix.indexOf(SEPARATOR));
-            populate($('#kms-main'));
+            $(window).bind('hashchange', anchorLoadChange).trigger('hashchange');
+            loadSubKmsContents($(KMSMAIN));
         }
     );
 
     //*********************************
     // API
     //*********************************
-    module.loadPage = loadPage;
     module.setAnchorLoadDefault = setAnchorLoadDefault;
     module.anchorLoadChange = anchorLoadChange;
+    module.savePage = savePage;
+    module.newPage = newPage;
+    module.addPlugin = addPlugin;
     module.URL = "https://apps.eecs.berkeley.edu/~ksen/readwrite.php";
 
 }(KMS));

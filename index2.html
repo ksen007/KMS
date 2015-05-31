@@ -48,16 +48,20 @@
         .kms-content {
             display: none;
         }
+
+        .kms-script {
+            display: none;
+        }
     </style>
 
 </head>
 <body>
 
-<div id="kms-main" class="kms-location" data-default="ks-body"></div>
+<div id="kms-main" class="kms-location" data-default="kms-body"></div>
 
 <div class="container" style="z-index: 10000;">
     <a data-toggle="collapse" href="#kms-collapse">
-        <span class="glyphicon glyphicon-plus"></span>
+        <small>+</small></small></span>
     </a>
 
     <div class="row">
@@ -82,9 +86,13 @@
             <div id="kms-drop-area-div" class="col-md-2">
                 Drag and Drop Files Here<br/>
             </div>
-            <div class="col-md-2">
-                <span onclick="KMS.loadPage($('#kms-file').val(),'kms-main-edit', true)"
-                      class="glyphicon glyphicon-edit"></span>
+            <div class="col-md-1">
+                <span onclick="KMS.savePage()"
+                      class="glyphicon glyphicon-check"></span>
+            </div>
+            <div class="col-md-1">
+                <span onclick="KMS.newPage()"
+                      class="glyphicon glyphicon-file"></span>
             </div>
         </div>
     </div>
@@ -141,35 +149,8 @@
     </dd>
 </div>
 
+<!-- KMS Contents -->
 
-<div id="ks-body" class="kms-content">
-    Hello world!
-    Left
-    <div class="kms-location" data-default="ks-left"></div>
-    Right
-    <div class="kms-location" data-default="ks-right"></div>
-    end.
-</div>
-
-<div id="ks-left" class="kms-content">
-    Left1
-</div>
-
-<div id="ks-right" class="kms-content">
-    Top
-    <div class="kms-location" data-default="ks-top"></div>
-    Bottom
-    <div class="kms-location" data-default="ks-bottom"></div>
-    end.
-</div>
-
-<div id="ks-top" class="kms-content">
-    Top1
-</div>
-
-<div id="ks-bottom" class="kms-content">
-    Bottom1
-</div>
 
 </body>
 </html>
