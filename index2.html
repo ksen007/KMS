@@ -1,0 +1,178 @@
+<!doctype html>
+
+<html lang="en">
+
+<title>Koushik Sen's Homepage</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<head>
+    <link rel="stylesheet" href="libkms/bootstrap.min.css">
+    <link rel="stylesheet" href="libkms/bootstrap-dialog.min.css">
+    <link rel="stylesheet" href="libkms/codemirror.min.css">
+    <link rel="stylesheet" href="libkms/fullscreen.min.css">
+
+    <script src="libkms/jquery.min.js"></script>
+    <script src="libkms/bootstrap.min.js"></script>
+    <script src="libkms/bootstrap-dialog.min.js"></script>
+    <script src="libkms/codemirror.min.js"></script>
+    <script src="libkms/markdown.min.js"></script>
+    <script src="libkms/css.min.js"></script>
+    <script src="libkms/javascript.min.js"></script>
+    <script src="libkms/xml.min.js"></script>
+    <script src="libkms/htmlembedded.min.js"></script>
+    <script src="libkms/clike.min.js"></script>
+    <script src="libkms/php.min.js"></script>
+    <script src="libkms/matchbrackets.min.js"></script>
+    <script src="libkms/fullscreen.min.js"></script>
+    <script src="libkms/showdown.min.js"></script>
+    <script src="libkms/creole.js"></script>
+    <script src="kms2.js"></script>
+    <script src="libkms/bibtex_js.js"></script>
+    <script src="libkms/aes.js"></script>
+    <script src="libkms/dmuploader.min.js"></script>
+
+    <style type="text/css">
+        .CodeMirror {
+            border: 1px solid black;
+            height: auto;
+        }
+
+        .glyphicon {
+            opacity: 0.2;
+        }
+
+        .glyphicon:hover {
+            opacity: 1.0;
+        }
+
+        .kms-content {
+            display: none;
+        }
+    </style>
+
+</head>
+<body>
+
+<div id="kms-main" class="kms-location" data-default="ks-body"></div>
+
+<div class="container" style="z-index: 10000;">
+    <a data-toggle="collapse" href="#kms-collapse">
+        <span class="glyphicon glyphicon-plus"></span>
+    </a>
+
+    <div class="row">
+        <div id="kms-collapse" class="collapse">
+            <div class="form-group col-md-2">
+                <input type="password" id="kms-key1" class="pull-right form-control input-sm" style="padding: 1em;"
+                       placeholder="Enter key for encryption ...">
+            </div>
+            <div class="form-group col-md-2">
+                <input type="password" id="kms-key2" class="pull-right form-control input-sm" style="padding: 1em;"
+                       placeholder="Reenter key for encryption ...">
+            </div>
+            <div class="form-group col-md-2">
+                <input type="password" id="kms-password" class="pull-right form-control input-sm"
+                       style="padding: 1em;"
+                       placeholder="Enter password for editing ...">
+            </div>
+            <div class="form-group col-md-2">
+                <input id="kms-file" class="pull-right form-control input-sm"
+                       style="padding: 1em;">
+            </div>
+            <div id="kms-drop-area-div" class="col-md-2">
+                Drag and Drop Files Here<br/>
+            </div>
+            <div class="col-md-2">
+                <span onclick="KMS.loadPage($('#kms-file').val(),'kms-main-edit', true)"
+                      class="glyphicon glyphicon-edit"></span>
+            </div>
+        </div>
+    </div>
+    <div id="kms-main-edit"></div>
+</div>
+<div class="bibtex_template" style="display:none;">
+    <dt> [
+        <span class="if myconfurl">
+            <a class="myconfurl"><span class="myconfname"></span></a>
+        </span>
+        <span class="if pdf">
+            | <a class="pdf"> pdf </a>
+        </span>
+        <span class="if ps">
+            |<a class="ps"> ps </a>
+        </span>
+        <span class="if slides">
+            |<a class="slides"> ppt </a>
+        </span>
+        <span class="if tr">
+            |<a class="tr"> tr </a>
+        </span>
+        ]
+    </dt>
+    <dd style="margin-left: 20px">
+              <span class="if author">
+                <span class="author"></span>,
+              </span>
+        "<span class="title"></span>,"
+              <span class="if booktitle" style="font-style: italic;">
+                in <span class="booktitle" style="font-style: italic;"></span>,
+              </span>
+              <span class="if journal" style="font-style: italic;">
+                <span class="journal"></span>,
+              </span>
+              <span class="if publisher">
+                <span class="publisher"></span>,
+              </span>
+              <span class="if school">
+                <span class="school"></span>,
+              </span>
+              <span class="if volume">
+                <span class="volume"></span>
+                <span class="if number">
+                  (<span class="number"></span>)
+                </span>,
+              </span>
+                <span class="if pages">
+                  pages <span class="pages"></span>,
+                </span>
+              <span class="if year">
+                 <span class="year"></span>
+              </span>.
+    </dd>
+</div>
+
+
+<div id="ks-body" class="kms-content">
+    Hello world!
+    Left
+    <div class="kms-location" data-default="ks-left"></div>
+    Right
+    <div class="kms-location" data-default="ks-right"></div>
+    end.
+</div>
+
+<div id="ks-left" class="kms-content">
+    Left1
+</div>
+
+<div id="ks-right" class="kms-content">
+    Top
+    <div class="kms-location" data-default="ks-top"></div>
+    Bottom
+    <div class="kms-location" data-default="ks-bottom"></div>
+    end.
+</div>
+
+<div id="ks-top" class="kms-content">
+    Top1
+</div>
+
+<div id="ks-bottom" class="kms-content">
+    Bottom1
+</div>
+
+</body>
+</html>
+
+
+
