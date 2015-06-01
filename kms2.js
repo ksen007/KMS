@@ -155,6 +155,9 @@ var KMS = {};
 
     function decrypt(content) {
         var text = content.data;
+        if (text === "") {
+            return text;
+        }
         var transformers = content.transformers;
         var key = getPass('kms-key1');
 
@@ -253,10 +256,13 @@ var KMS = {};
                     console.log("Success");
                     console.log(result['data']);
                     BootstrapDialog.show({
-                        message: 'Successfully saved '+data.file
-                    });                }
+                        message: 'Successfully saved ' + data.file
+                    });
+                }
             },
-            error: function(){ saveerr(file); }
+            error: function () {
+                saveerr(file);
+            }
         })
 
     }
@@ -286,8 +292,8 @@ var KMS = {};
         var parser = document.createElement('a');
         parser.href = document.location.href;
         var file = parser.pathname.substring(1);
-        if (file.indexOf('~')===0) {
-            file = file.substring(file.indexOf('/')+1);
+        if (file.indexOf('~') === 0) {
+            file = file.substring(file.indexOf('/') + 1);
         }
 
         var econtent;
@@ -326,13 +332,13 @@ var KMS = {};
         }
 
         $divhtml.html(parser(content));
+        parent.find('.kms-script').each(function (i) {
+            var dis = $(this);
+            parent.append($('<script type="text/javascript">' + dis.text() + '</script>'));
+        });
         parent.find('.kms-location').each(function (i) {
             var dis = $(this);
             loadSubKmsContents(dis);
-        });
-        parent.find('.kms-script').each(function (i) {
-            var dis = $(this);
-            parent.append($('<script type="text/javascript">'+dis.html()+'</script>'));
         });
     }
 
@@ -342,7 +348,7 @@ var KMS = {};
 
         var data = contents[divid];
         if (data === undefined) {
-            data = {data: "No content", transformers: transformers, creation: Date.now(), update: Date.now()};
+            data = {data: "", transformers: transformers, creation: Date.now(), update: Date.now()};
             contents[divid] = data;
         }
         transformers = data.transformers ? data.transformers : transformers;
@@ -355,7 +361,7 @@ var KMS = {};
 
 
         var $buttonEdit = $('<span class="glyphicon glyphicon-edit pull-right" style="padding: 2px;" title="Edit ' + divid + '"></span>');
-        var $buttonRemove = $('<span class="glyphicon glyphicon-trash pull-right" style="padding: 2px;" title="Delete ' + divid + '"></span>');
+        var $buttonRemove = $('<span class="glyphicon glyphicon-plus pull-right" style="padding: 2px;" title="Add sub element ' + divid + '"></span>');
         var $buttonSave = $('<span class="glyphicon glyphicon-check pull-right" style="padding: 2px;" title="Save ' + divid + '"></span>');
         var $buttonCancel = $('<span class="glyphicon glyphicon-remove-circle pull-right" style="padding: 2px;" title="Cancel edit of ' + divid + '"></span>');
 
@@ -392,29 +398,49 @@ var KMS = {};
             editor = undefined;
         }
 
-        function saveAction(e) {
-            var content = editor.getValue();
-            var oldContent = contents[divid].data;
-            if (content !== oldContent) {
+        function prependAction(e) {
+            var dec = decrypt((contents[divid]));
+            if (dec !== null) {
                 modified = true;
-                contents[divid].data = content;
+                var cls = $divhtml.children('.kms-location').first().data('transformers');
+                dec = '\x3Cdiv class="kms-location" data-transformers="' + cls + '" data-default="x' + Math.random().toString(36).substring(7) + '">\x3C/div>\n' + dec;
+
+                contents[divid].data = dec;
                 contents[divid].update = Date.now();
                 var enc = encrypt(contents[divid]);
                 if (enc === null) {
                     return;
                 }
                 contents[divid].data = enc;
-
-
                 setContent(parent, divid, $divhtml, parser);
-                switchToPreview();
             } else {
-                switchToPreview();
+                BootstrapDialog.show({
+                    type: BootstrapDialog.TYPE_WARNING,
+                    title: 'Warning',
+                    message: 'Cannot edit encrypted data before decryption.'
+                });
             }
         }
 
+        function saveAction(e) {
+            var content = editor.getValue();
+            modified = true;
+            contents[divid].data = content;
+            contents[divid].update = Date.now();
+            var enc = encrypt(contents[divid]);
+            if (enc === null) {
+                return;
+            }
+            contents[divid].data = enc;
+
+
+            setContent(parent, divid, $divhtml, parser);
+            switchToPreview();
+        }
+
         function editAction() {
-            if (contents[divid].data !== encString) {
+            var dec = decrypt((contents[divid]));
+            if (dec !== null) {
                 $buttonSave.show();
                 $buttonCancel.show();
                 $buttonEdit.hide();
@@ -436,7 +462,7 @@ var KMS = {};
                         }
                     }
                 });
-                editor.setValue(contents[divid].data);
+                editor.setValue(dec);
             } else {
                 BootstrapDialog.show({
                     type: BootstrapDialog.TYPE_WARNING,
@@ -476,6 +502,7 @@ var KMS = {};
         $buttonEdit.click(editAction);
         $buttonSave.click(saveAction);
         $buttonCancel.click(cancelAction);
+        $buttonRemove.click(prependAction);
 
 
         setContent(parent, divid, $divhtml, parser);
@@ -573,7 +600,7 @@ var KMS = {};
             function (i) {
                 var tmp = $(this);
                 contents[this.id] = {
-                    data: tmp.html(),
+                    data: _.unescape(tmp.html()),
                     transformers: tmp.data('transformers'),
                     creation: tmp.data('creation-time'),
                     update: tmp.data('update-time')
