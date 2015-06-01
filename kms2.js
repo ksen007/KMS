@@ -179,36 +179,6 @@ var KMS = {};
     }
 
 
-    function serializeKmsContent(parent) {
-        var ret = "";
-        var divid = parent.data('default'),
-            transformers = contents[divid].transformers,
-            creation = contents[divid].creation,
-            update = contents[divid].update;
-        var parser = getParser(transformers);
-
-        var enc = encrypt(contents[divid]);
-        if (enc === null) {
-            throw new Error("Failed to encrypt");
-        }
-        ret = ret +
-        '\x3Cdiv id="' + divid +
-        '" class="kms-content" data-transformers="' + transformers +
-        '" data-creation-time="' + creation +
-        '" data-update-time="' + update +
-        '">' +
-        enc +
-        '\x3C/div>\n';
-
-        var $divhtml = $('\x3Cdiv>\x3C/div>');
-        $divhtml.html(parser(contents[divid].data));
-        $divhtml.find('.kms-location').each(function (i) {
-            var dis = $(this);
-            ret = ret + serializeKmsContent(dis);
-        });
-        return ret;
-    }
-
     function serializePage() {
         var ret = pagePrefix;
         ret = ret + SEPARATOR + "\n";
@@ -288,17 +258,37 @@ var KMS = {};
         })
     }
 
-    function savePage2() {
+    function getCurrentFileName() {
         var parser = document.createElement('a');
         parser.href = document.location.href;
         var file = parser.pathname.substring(1);
         if (file.indexOf('~') === 0) {
             file = file.substring(file.indexOf('/') + 1);
         }
+        return file;
+    }
 
+    function savePage2() {
+        var file = getCurrentFileName();
         var econtent;
         econtent = serializePage();
         savePageAux(file, econtent);
+    }
+
+
+    function download2() {
+        var text = serializePage();
+        var filename = getCurrentFileName();
+        var pom = document.createElement('a');
+        pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+        pom.setAttribute('download', filename);
+
+        pom.style.display = 'none';
+        document.body.appendChild(pom);
+
+        pom.click();
+
+        document.body.removeChild(pom);
     }
 
 
@@ -307,6 +297,10 @@ var KMS = {};
         ret = ret + SEPARATOR + "\n";
         ret = ret + '</body>\n</html>\n';
         savePageAux($('#kms-file').val(), ret);
+    }
+
+    function download() {
+        loadTemplate(download2);
     }
 
     function savePage() {
@@ -331,7 +325,7 @@ var KMS = {};
             content = encString;
         }
 
-        $divhtml.html(parser(content));
+        $divhtml.html(parser(content, contents[divid]));
         parent.find('.kms-script').each(function (i) {
             var dis = $(this);
             parent.append($('<script type="text/javascript">' + dis.text() + '</script>'));
@@ -627,6 +621,7 @@ var KMS = {};
     module.savePage = savePage;
     module.newPage = newPage;
     module.addPlugin = addPlugin;
+    module.download = download;
     module.URL = "https://apps.eecs.berkeley.edu/~ksen/readwrite.php";
 
 }(KMS));
