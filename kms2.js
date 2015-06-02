@@ -186,13 +186,13 @@ var KMS = {};
             if (contents.hasOwnProperty(divid)) {
                 var content = contents[divid];
                 ret = ret +
-                '\x3Cdiv id="' + divid +
+                '\x3Ctextarea id="' + divid +
                 '" class="kms-content" data-transformers="' + content.transformers +
                 '" data-creation-time="' + content.creation +
                 '" data-update-time="' + content.update +
                 '">' +
-                content.data +
-                '\x3C/div>\n\n<!-- SEPARATOR -->\n';
+                content.data.replace(/<(\/textarea>)/gi, '&lt;$1') +
+                '\x3C/textarea>\n\n<!-- SEPARATOR -->\n';
             }
         }
         ret = ret + '</body>\n</html>\n';
@@ -594,7 +594,7 @@ var KMS = {};
             function (i) {
                 var tmp = $(this);
                 contents[this.id] = {
-                    data: _.unescape(tmp.html()),
+                    data: tmp.text().replace(/&lt;(\/textarea>)/gi,"<$1"),
                     transformers: tmp.data('transformers'),
                     creation: tmp.data('creation-time'),
                     update: tmp.data('update-time')
