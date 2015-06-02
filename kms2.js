@@ -6,6 +6,31 @@ var KMS = {};
     var KMSMAIN = '#kms-main';
     var pagePrefix;
     var SEPARATOR = "<!-- KMS Contents -->";
+    var encString = "***x***";
+
+
+    /********************************************************************/
+
+    function getPass(id) {
+        var currVal = $('#' + id).val();
+        if (currVal !== undefined && currVal.length > 0) {
+            localStorage.setItem(id, CryptoJS.AES.encrypt(currVal, id));
+            return currVal;
+        } else {
+            var oldVal = localStorage.getItem(id);
+            if (oldVal) {
+                var pass = CryptoJS.AES.decrypt(oldVal, id);
+                if (pass.sigBytes > 0) {
+                    return pass.toString(CryptoJS.enc.Utf8);
+                }
+            }
+            return currVal;
+        }
+    }
+
+    /*******************************************************************
+     * Plugin related functions
+     */
 
     var markdown = new Showdown.converter();
 
@@ -23,6 +48,11 @@ var KMS = {};
     function escapeHtml(string) {
         return string.replace(/\n|\r\n|\r/g, '<br/>').replace(/ /g, '&nbsp;');
     }
+
+    function identity(str) {
+        return str;
+    }
+
 
     var plugins = {
         '.txt': {
@@ -67,28 +97,6 @@ var KMS = {};
         plugins[transformers] = {mode: mode, converter: converter};
     }
 
-    function identity(str) {
-        return str;
-    }
-
-    function getPass(id) {
-        var currVal = $('#' + id).val();
-        if (currVal !== undefined && currVal.length > 0) {
-            localStorage.setItem(id, CryptoJS.AES.encrypt(currVal, id));
-            return currVal;
-        } else {
-            var oldVal = localStorage.getItem(id);
-            if (oldVal) {
-                var pass = CryptoJS.AES.decrypt(oldVal, id);
-                if (pass.sigBytes > 0) {
-                    return pass.toString(CryptoJS.enc.Utf8);
-                }
-            }
-            return currVal;
-        }
-    }
-
-
     function getParser(divid) {
         try {
             var pos = divid.lastIndexOf('.');
@@ -118,10 +126,12 @@ var KMS = {};
     }
 
 
-    function isEnc(divid) {
-        var pos = divid.lastIndexOf('.');
+    /********************************************************************/
+
+    function isEnc(transformers) {
+        var pos = transformers.lastIndexOf('.');
         if (pos >= 0) {
-            var prefix = divid.substring(0, pos);
+            var prefix = transformers.substring(0, pos);
             pos = prefix.lastIndexOf('.');
             var ext = prefix.substring(pos);
             return ext === '.enc';
@@ -129,27 +139,29 @@ var KMS = {};
         return false;
     }
 
-    var encString = "***x***";
 
-    function encrypt(content) {
-        var text = content.data;
+    function encrypt(content, text) {
         var transformers = content.transformers;
         var key1 = getPass('kms-key1');
         var key2 = getPass('kms-key2');
 
         if (isEnc(transformers)) {
             if (key1.length > 0 && key1 === key2) {
-                return CryptoJS.AES.encrypt(text, key1).toString();
+                content.data = CryptoJS.AES.encrypt(text, key1).toString();
+                content.update = Date.now();
+                return true;
             } else {
                 BootstrapDialog.show({
                     type: BootstrapDialog.TYPE_WARNING,
                     title: 'Error',
                     message: 'Encryption password is either unavailable or there is a mismatch.'
                 });
-                return null;
+                return false;
             }
         } else {
-            return text;
+            content.data = text;
+            content.update = Date.now();
+            return true;
         }
     }
 
@@ -177,6 +189,8 @@ var KMS = {};
             return text;
         }
     }
+
+    /********************************************************************/
 
 
     function serializePage() {
@@ -311,21 +325,20 @@ var KMS = {};
         loadTemplate(newPage2);
     }
 
+    /********************************************************************/
+
     function loadSubKmsContents(div) {
         var transformers = div.data('transformers');
-        if (transformers === undefined) {
-            transformers = ".html"
-        }
         loadKmsContent(div.data('default'), transformers, div);
     }
 
-    function setContent(parent, divid, $divhtml, parser) {
-        var content = decrypt(contents[divid]);
-        if (content === null) {
-            content = encString;
+    function setContent(parent, $divhtml, content, parser) {
+        var text = decrypt(content);
+        if (text === null) {
+            text = encString;
         }
 
-        $divhtml.html(parser(content, contents[divid]));
+        $divhtml.html(parser(text, content));
         parent.find('.kms-script').each(function (i) {
             var dis = $(this);
             parent.append($('<script type="text/javascript">' + dis.text() + '</script>'));
@@ -340,12 +353,13 @@ var KMS = {};
     function loadKmsContent(divid, transformers, parent) {
         if (divid === undefined) return;
 
-        var data = contents[divid];
-        if (data === undefined) {
-            data = {data: "", transformers: transformers, creation: Date.now(), update: Date.now()};
-            contents[divid] = data;
+        transformers = transformers || ".html";
+        var content = contents[divid];
+        if (content === undefined) {
+            content = {data: "", transformers: transformers, creation: Date.now(), update: Date.now()};
+            contents[divid] = content;
         }
-        transformers = data.transformers ? data.transformers : transformers;
+        transformers = content.transformers || transformers;
 
         var parser = getParser(transformers);
 
@@ -395,18 +409,12 @@ var KMS = {};
         function prependAction(e) {
             var dec = decrypt((contents[divid]));
             if (dec !== null) {
-                modified = true;
                 var cls = $divhtml.children('.kms-location').first().data('transformers');
                 dec = '\x3Cdiv class="kms-location" data-transformers="' + cls + '" data-default="x' + Math.random().toString(36).substring(7) + '">\x3C/div>\n' + dec;
-
-                contents[divid].data = dec;
-                contents[divid].update = Date.now();
-                var enc = encrypt(contents[divid]);
-                if (enc === null) {
-                    return;
+                if (encrypt(contents[divid], dec)) {
+                    modified = true;
+                    setContent(parent, $divhtml, contents[divid], parser);
                 }
-                contents[divid].data = enc;
-                setContent(parent, divid, $divhtml, parser);
             } else {
                 BootstrapDialog.show({
                     type: BootstrapDialog.TYPE_WARNING,
@@ -418,18 +426,11 @@ var KMS = {};
 
         function saveAction(e) {
             var content = editor.getValue();
-            modified = true;
-            contents[divid].data = content;
-            contents[divid].update = Date.now();
-            var enc = encrypt(contents[divid]);
-            if (enc === null) {
-                return;
+            if (encrypt(contents[divid], content)) {
+                modified = true;
+                setContent(parent, $divhtml, contents[divid], parser);
+                switchToPreview();
             }
-            contents[divid].data = enc;
-
-
-            setContent(parent, divid, $divhtml, parser);
-            switchToPreview();
         }
 
         function editAction() {
@@ -499,7 +500,7 @@ var KMS = {};
         $buttonRemove.click(prependAction);
 
 
-        setContent(parent, divid, $divhtml, parser);
+        setContent(parent, $divhtml, contents[divid], parser);
     }
 
     function loadKmsContentFromTag(dividtransformers, parentDiv) {
@@ -508,6 +509,8 @@ var KMS = {};
         parentDiv = $('#' + parentDiv);
         loadKmsContent(divid, transformers, parentDiv);
     }
+
+    /********************************************************************/
 
     var currentAnchorMap = {};
     var anchorLoadDefault = '';
@@ -549,6 +552,7 @@ var KMS = {};
         }
     }
 
+    /********************************************************************/
 
     function initUploader() {
         $("#kms-drop-area-div").dmUploader({
@@ -589,12 +593,14 @@ var KMS = {};
         });
     }
 
+    /********************************************************************/
+
     function collectContents() {
         $('.kms-content').each(
             function (i) {
                 var tmp = $(this);
                 contents[this.id] = {
-                    data: tmp.text().replace(/&lt;(\/textarea>)/gi,"<$1"),
+                    data: tmp.text().replace(/&lt;(\/textarea>)/gi, "<$1"),
                     transformers: tmp.data('transformers'),
                     creation: tmp.data('creation-time'),
                     update: tmp.data('update-time')
@@ -603,6 +609,7 @@ var KMS = {};
         );
     }
 
+    /********************************************************************/
 
     $(document).ready(function () {
             console.log("Populating page");
