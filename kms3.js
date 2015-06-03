@@ -190,8 +190,8 @@ var KMS = {};
     /********************************************************************/
 
     function refreshContent(container) {
-        var contentid = container.data('content');
-        var type = container.data('type') || ".html";
+        var contentid = container[0].getAttribute('data-content');
+        var type = container[0].getAttribute('data-type') || ".html";
         var content = Content.getContent(contentid, type);
         var text = content.getText();
 
@@ -460,8 +460,8 @@ var KMS = {};
                         var id = idtype.substring(0, idtype.indexOf("."));
                         var type = idtype.substring(idtype.indexOf("."));
 
-                        container.data('content', id);
-                        container.data('type', type);
+                        container[0].setAttribute('data-content', id);
+                        container[0].setAttribute('data-type', type);
 
                         refreshContent(container);
                     }
@@ -656,12 +656,12 @@ var KMS = {};
             console.log("Populating page");
             initUploader();
             collectContents();
-            $(window).bind('hashchange', anchorLoadChange).trigger('hashchange');
             refreshContent($(KMSMAIN));
-            var hash = window.location.hash;
-            if (hash !== '') {
-                anchorLoadChange();
-            }
+            //var hash = window.location.hash;
+            //if (hash !== '') {
+            //    anchorLoadChange();
+            //}
+            $(window).bind('hashchange', anchorLoadChange).trigger('hashchange');
         }
     );
 
