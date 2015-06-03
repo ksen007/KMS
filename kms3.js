@@ -109,6 +109,49 @@ var KMS = {};
         return str;
     }
 
+    var escapeMap = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#x27;',
+        '`': '&#x60;'
+    };
+
+    function invert(map) {
+        var ret = {};
+        for (var i in map) {
+            if (map.hasOwnProperty(i)) {
+                ret[map[i]] = i;
+            }
+        }
+        return ret;
+    }
+
+    var unescapeMap = invert(escapeMap);
+
+    var createEscaper = function (map) {
+        var escaper = function (match) {
+            return map[match];
+        };
+
+        var keys = [];
+        for (var i in map) {
+            if (map.hasOwnProperty(i)) {
+                keys.push(i);
+            }
+        }
+        var source = '(?:' + keys.join('|') + ')';
+        var testRegexp = RegExp(source);
+        var replaceRegexp = RegExp(source, 'g');
+        return function (string) {
+            string = string == null ? '' : '' + string;
+            return testRegexp.test(string) ? string.replace(replaceRegexp, escaper) : string;
+        };
+    };
+
+    var escape = createEscaper(escapeMap);
+    var unescape = createEscaper(unescapeMap);
 
     var plugins = {
         '.txt': {
@@ -244,6 +287,10 @@ var KMS = {};
             content.type = type || content.type;
         }
         return content;
+    };
+
+    Content.deleteContent = function (id) {
+        delete contents[id];
     };
 
     Content.prototype.getText = function () {
@@ -413,6 +460,14 @@ var KMS = {};
         savePageAux($('#kms-file').val(), ret);
     }
 
+
+    function savePageAs2() {
+        var econtent;
+        econtent = serializePage();
+        savePageAux($('#kms-file').val(), econtent);
+    }
+
+
     function download() {
         loadTemplate(download2);
     }
@@ -421,13 +476,37 @@ var KMS = {};
         loadTemplate(savePage2);
     }
 
+    function savePageAs() {
+        loadTemplate(savePageAs2);
+    }
+
     function newPage() {
         loadTemplate(newPage2);
     }
 
+    function listContentsForDeletion() {
+        var e = $('#kms-list');
+        if (e.size() > 0) {
+            e.remove();
+        } else {
+            var html = '<ul id="kms-list">';
+            for (var divid in contents) {
+                if (contents.hasOwnProperty(divid)) {
+                    var content = contents[divid];
+                    html = html + '<li><a href="#!trash=' + divid + content.type + '">[Remove] ' + escape(content.getText().substring(0, 40)) + '</a></li>\n';
+                }
+            }
+            html = html + '</ul>';
+            e.remove();
+            $('body').append($(html));
+        }
+    }
+
     module.savePage = savePage;
+    module.savePageAs = savePageAs;
     module.newPage = newPage;
     module.download = download;
+    module.listContents = listContentsForDeletion;
 
     /********************************************************************/
 
@@ -458,15 +537,17 @@ var KMS = {};
             for (k in anchorMap) {
                 if (anchorMap.hasOwnProperty(k)) {
                     if (currentAnchorMap[k] !== anchorMap[k]) {
-                        var container = $('#' + k);
                         var idtype = anchorMap[k];
                         var id = idtype.substring(0, idtype.indexOf("."));
                         var type = idtype.substring(idtype.indexOf("."));
-
-                        container[0].setAttribute('data-content', id);
-                        container[0].setAttribute('data-type', type);
-
-                        refreshContent(container);
+                        if (k === 'trash') {
+                            Content.deleteContent(id);
+                        } else {
+                            var container = $('#' + k);
+                            container[0].setAttribute('data-content', id);
+                            container[0].setAttribute('data-type', type);
+                            refreshContent(container);
+                        }
                     }
                 }
             }

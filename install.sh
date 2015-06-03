@@ -27,6 +27,7 @@ wget http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/aes.js
 wget -O creole.js http://sourceforge.net/p/jscreole/code/HEAD/tree/creole.js?format=raw
 wget http://bibtex-js.googlecode.com/svn/trunk/src/bibtex_js.js
 wget https://raw.githubusercontent.com/danielm/uploader/master/src/dmuploader.min.js
+wget http://getbootstrap.com/examples/blog/blog.css
 
 cd ..
 rm -rf fonts
