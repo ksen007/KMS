@@ -191,7 +191,7 @@ var KMS = {};
 
     function refreshContent(container) {
         var contentid = container[0].getAttribute('data-content');
-        var type = container[0].getAttribute('data-type') || ".html";
+        var type = container[0].getAttribute('data-type');
         var content = Content.getContent(contentid, type);
         var text = content.getText();
 
@@ -200,11 +200,11 @@ var KMS = {};
         oldTransformer = content.getTransformer();
 
         html = oldTransformer(interHtml);
-        html = html.replace(/{{THISCONTENT}}/g, "KMS.Content.getContent('" + contentid + "','" + type + "')");
+        html = html.replace(/{{THISCONTENT}}/g, "KMS.Content.getContent('" + contentid + "','" + content.type + "')");
         container.html(html);
         if (content.getTransformer() !== oldTransformer) {
             html = content.getTransformer(interHtml);
-            html = html.replace(/{{THISCONTENT}}/g, "KMS.Content.getContent('" + contentid + "','" + type + "')");
+            html = html.replace(/{{THISCONTENT}}/g, "KMS.Content.getContent('" + contentid + "','" + content.type + "')");
             container.html(html);
         }
 
@@ -238,7 +238,10 @@ var KMS = {};
     Content.getContent = function (id, type) {
         var content = contents[id];
         if (!content) {
+            type = type || ".html";
             contents[id] = content = new Content(id, "", Content.defaultTransformer, type, Date.now(), Date.now());
+        } else {
+            content.type = type || content.type;
         }
         return content;
     };
@@ -455,7 +458,7 @@ var KMS = {};
             for (k in anchorMap) {
                 if (anchorMap.hasOwnProperty(k)) {
                     if (currentAnchorMap[k] !== anchorMap[k]) {
-                        var container = $('#'+k);
+                        var container = $('#' + k);
                         var idtype = anchorMap[k];
                         var id = idtype.substring(0, idtype.indexOf("."));
                         var type = idtype.substring(idtype.indexOf("."));

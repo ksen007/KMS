@@ -6,7 +6,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <head>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <link rel="stylesheet" href="libkms/bootstrap.min.css">
     <link rel="stylesheet" href="libkms/bootstrap-dialog.min.css">
     <link rel="stylesheet" href="libkms/codemirror.min.css">
     <link rel="stylesheet" href="libkms/fullscreen.min.css">
@@ -14,6 +14,7 @@
     <script src="libkms/jquery.min.js"></script>
     <script src="libkms/bootstrap.min.js"></script>
     <script src="libkms/bootstrap-dialog.min.js"></script>
+    <script src="libkms/underscore-min.js"></script>
     <script src="libkms/codemirror.min.js"></script>
     <script src="libkms/markdown.min.js"></script>
     <script src="libkms/css.min.js"></script>
@@ -26,10 +27,10 @@
     <script src="libkms/fullscreen.min.js"></script>
     <script src="libkms/showdown.min.js"></script>
     <script src="libkms/creole.js"></script>
-    <script src="libkms/bibtex_js.js"></script>
+    <script src="kms3.js"></script>
     <script src="libkms/aes.js"></script>
     <script src="libkms/dmuploader.min.js"></script>
-    <script src="kms.js"></script>
+    <script src="libkms/bibtex_js.js"></script>
 
     <style type="text/css">
         .CodeMirror {
@@ -44,20 +45,24 @@
         .glyphicon:hover {
             opacity: 1.0;
         }
+
+        .kms-content {
+            display: none;
+        }
+
+        .kms-script {
+            display: none;
+        }
     </style>
 
 </head>
 <body>
 
-<div id="kms-main"></div>
-<script type="text/javascript">
-    HPage.URL = "https://apps.eecs.berkeley.edu/~ksen/readwrite.php";
-    HPage.loadPage("hpage/index.html", "kms-main");
-</script>
+<div id="kms-main" class="kms-location" data-content="kms-body"></div>
 
 <div class="container" style="z-index: 10000;">
     <a data-toggle="collapse" href="#kms-collapse">
-        <span class="glyphicon glyphicon-plus"></span>
+        <small>+</small></small></span>
     </a>
 
     <div class="row">
@@ -83,14 +88,1558 @@
                 Drag and Drop Files Here<br/>
             </div>
             <div class="col-md-2">
-                <span onclick="HPage.loadPage($('#kms-file').val(),'kms-main-edit', true)"
-                      class="glyphicon glyphicon-edit"></span>
+                <span onclick="KMS.savePage()"
+                      class="glyphicon glyphicon-check"></span>
+                <span onclick="KMS.download()"
+                      class="glyphicon glyphicon-download-alt"></span>
+                <span onclick="KMS.newPage()"
+                      class="glyphicon glyphicon-file"></span>
             </div>
         </div>
     </div>
     <div id="kms-main-edit"></div>
 </div>
-<div class="bibtex_template">
+
+<!-- KMS Contents -->
+<textarea id="kms-body" class="kms-content" data-type=".html" data-creation-time="1433281376535" data-update-time="1433291235075">
+
+<style type="text/css">
+    .row.vertical-divider {
+        overflow: hidden;
+    }
+    .row.vertical-divider > div[class^="col-"] {
+        padding-bottom: 100px;
+        margin-bottom: -100px;
+        border-left: 1px solid #F2F7F9;
+        border-right: 1px solid #F2F7F9;
+    }
+    .row.vertical-divider div[class^="col-"]:first-child {
+        border-left: none;
+    }
+    .row.vertical-divider div[class^="col-"]:last-child {
+        border-right: none;
+    }
+</style>
+
+<div class="container">
+    <nav class="navbar navbar-inverse navbar-default">
+        <div class="container-fluid">
+            <div>
+                <ul id="ks-menu" class="nav navbar-nav">
+                    <li><a href="#!ks-side=news.md&ks-body=about.html">Home</a></li>
+                    <li><a href="#!ks-side=news.md&ks-body=students.wiki">Students</a></li>
+                    <li><a href="#!ks-side=news.md&ks-body=teaching.wiki">Teaching</a></li>
+                    <li><a href="#!ks-side=news.md&ks-body=projects.wiki">Projects</a></li>
+                    <li><a href="#!ks-side=news.md&ks-body=publications.html">Publications</a></li>
+                    <li><a href="#!ks-side=news.md&ks-body=service.wiki">Service</a></li>
+                    <li><a href="#!ks-side=news.md&ks-body=faq.wiki">F.A.Q.</a></li>
+                    <li><a href="#!ks-side=notes.enc.md">Notes</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="row vertical-divider">
+        <div id="ks-side" class="col-md-4 kms-location" style="padding-left: 1em;" data-content="news"></div>
+        <div id="ks-body" class="col-md-8 kms-location" style="padding-right: 1em;"  data-content="about"></div>
+    </div>
+    <div class="navbar navbar-inverse navbar-default" style="bottom: 0; height: 2em; padding-left: 2em; padding-top: 1em;">
+        <p style="color: #8f8f8f;">© 2015 <a href="https://www.cs.berkeley.edu/~ksen/">Koushik Sen</a></p>
+    </div>
+    <script type="text/javascript">
+        $('.navbar li').click(function(e) {
+            $('.navbar li.active').removeClass('active');
+            var $this = $(this);
+            if (!$this.hasClass('active')) {
+                $this.addClass('active');
+            }
+            return true;
+        });
+    </script>
+</div>
+</textarea>
+
+<!-- SEPARATOR -->
+<textarea id="news" class="kms-content" data-type=".md" data-creation-time="1433281400138" data-update-time="1433281551052">### Updates
+  * Redesigned webpage with [KMS](https://github.com/ksen007/homepage-builder), a minimal online content-managment system that I wrote in my spare time.
+  
+  * [Jalangi2](https://github.com/Samsung/jalangi2) is now available.  Liang Gong and Michael Pradel built [DLint](https://github.com/ksen007/jalangi2analyses) (a dynamic bad-coding-practice checker for JavaScript) and [JITProf](https://github.com/ksen007/jalangi2analyses) (a JIT-unfriendly code snippet detector) on top of Jalangi. [MemInsight](https://github.com/Samsung/meminsight) (a memory-profiler for JavaScript and HTML5) is built on top of Jalangi2.
+
+  * Here is our [technical report](http://www.eecs.berkeley.edu/Pubs/TechRpts/2014/EECS-2014-173.html) on a new mechanism for state merging in symbolic execution called [MultiSE: Multi-path Symbolic Execution Using Value Summaries](papers/multise_tr.pdf) and the associated [slides](slides/multise.pdf).
+
+  * Checkout out our tech report on a JavaScript performance analysis tool: [“JITProf: Pinpointing JIT-unfriendly JavaScript Code“](http://www.eecs.berkeley.edu/Pubs/TechRpts/2014/EECS-2014-144.pdf).
+
+  * Quick access to my Google drive based [secure notes app](http://srl.cs.berkeley.edu/~ksen/secnote.html).
+
+  * Checkout [Jalangi](https://github.com/SRA-SiliconValley/jalangi) for JavaScript. I have incorporated some of the best ideas that I developed in the original DART, CUTE, and CalFuzzer tools. Development of Jalangi is supported by Samsung Research America. 
+  * Here is a [video](http://youtu.be/b8SeZTgwXEY) of my talk on our work on “DART: Directed Automated Random Testing”, PLDI’05 and “CUTE: A Concolic Unit Testing Engine for C”, FSE’05.
+  </textarea>
+
+<!-- SEPARATOR -->
+<textarea id="about" class="kms-content" data-type=".html" data-creation-time="1433281400139" data-update-time="1433284221563"><div class="row">
+    <div class="col-md-6">
+        <img src="ksen.jpg" class="img-responsive center-block" alt="Koushik Sen" width="225" height="200">
+    </div>
+    <div class="col-md-6">
+        <h3>Koushik Sen</h3><br>
+        Associate Professor,<br>
+        <a href="http://www.eecs.berkeley.edu/">Computer Sciences Division</a>,<br>
+        <a href="http://www.berkeley.edu/">University of California, Berkeley</a>.<br><br>
+
+        <u><strong>Contact Information</strong></u><br>
+        (Please read <a href="#!ks-side=news.md&ks-body=faq.wiki">this</a> before you contact me.)<br>
+        <address>
+            581 Soda Hall # 1776 <br>
+            Berkeley, CA 94720-1776 <br>
+            <u>Phone:</u> (510) 642-2420 <br>
+            <u>Fax:</u> (510) 643-1534 <br>
+            <u>Email:</u> ksen (at) cs.berkeley.edu<br>
+            <u>Assistant:</u> Roxana Infante, roxana at eecs.berkeley.edu <br>
+        </address>
+    </div>
+</div>
+<div id="ks-aboutmd" class="kms-location" data-content="about2" data-type=".md"></div>
+</textarea>
+
+<!-- SEPARATOR -->
+<textarea id="teaching" class="kms-content" data-type=".wiki" data-creation-time="1433281559264" data-update-time="1433284398119">=== Teaching ===
+  * Spring 2014: None (on sabbatical)
+  * Fall 2014: None (on sabbatical)
+  * Spring 2014
+     ** CS 164: [[https://sites.google.com/site/cs164spring2014/|Programming Languages and Compilers]]
+  * Fall 2013
+     ** CS 172: [[https://sites.google.com/site/fall2013cs172/|Computability and Complexity]]
+  * Spring 2012:
+     ** CS 172: [[https://sites.google.com/site/cs172spring2012/|Computability and Complexity]]
+     ** CS 169: [[http://goo.gl/zwM6K|Software Engineering]] (with Armando Fox and David A Patterson)
+  * Fall 2011:
+     ** CS 294-70: [[http://fa11.pbworks.com/|Automated Bug Finding and Debugging]]
+  * Spring 2011:
+     ** CS 172: [[https://sites.google.com/site/cs172spring2011/|Computability and Complexity]]
+  * Spring 2010: 
+     ** CS 169: [[http://inst.eecs.berkeley.edu/~cs169/sp10/|Software Engineering]]
+  * Fall 2009:
+     ** CS 265: [[http://fa09.pbwiki.com/|Dynamic Program Analysis, Testing, and Debugging]] 
+  * Spring 2009:
+     ** CS 294: [[http://sp09.pbwiki.com/|Dynamic Program Analysis, Testing, and Debugging]] (with several guest lectures from leading PL and SE researchers.)
+     ** CS 294-33: [[http://parlang.pbwiki.com/|Towards Highly-Productive Parallel Programming Languages]] (co-taught with Prof. Krste Asanovic and Prof. Dave Patterson)
+  * Fall 2008: 
+     ** CS169: [[http://inst.eecs.berkeley.edu/~cs169/fa08/|Software Engineering]]
+  * Spring 2008: None
+  * Fall 2007: 
+     ** CS169: [[http://inst.eecs.berkeley.edu/~cs169/fa07/|Software Engineering]]
+     ** CS 294-25. [[http://play.cs.berkeley.edu/wiki/cs294/fa07/index.php/Main_Page|Current Berkeley Research in Programming System]]
+  * Spring 2007: [[http://srl.cs.berkeley.edu/~ksen/wiki/index.php/Main_Page|CS294-5]]: Dynamic Program Analysis, Testing, and Debugging
+</textarea>
+
+<!-- SEPARATOR -->
+<textarea id="notes" class="kms-content" data-type=".enc.md" data-creation-time="1433281562161" data-update-time="1433285510011">U2FsdGVkX18hS792AyhndO297z1oJmlHKReG7QMebAWHuB2ObWmhV0SO9ngaJ3P7RRSrekfq8peUVuajLkelYp0b16v829C5HxxSxtbfwhEtYf/T6rvuq2c9KueQesYEzLSUQtFgsQVIqP1SnEvNF4QKWehZV/OUw+90QbCitCPNV0kM8fbBPx/izRjsOT6A</textarea>
+
+<!-- SEPARATOR -->
+<textarea id="publications" class="kms-content" data-type=".html" data-creation-time="1433281568431" data-update-time="1433291111317">[<a href="https://scholar.google.com/citations?user=Vn3L_ioAAAAJ&hl=en&oi=ao">Google Scholar</a>] [<a href="http://www.informatik.uni-trier.de/~ley/db/indices/a-tree/s/Sen:Koushik.html">DBLP</a>]<br><br>
+
+
+
+
+<textarea id="bibtex_input" style="display: none;">	
+@inproceedings{GPSfse15,
+    TITLE = {JITProf: Pinpointing JIT-unfriendly JavaScript Code},
+    AUTHOR = {Liang Gong and Michael Pradel and Koushik Sen},
+    BOOKTITLE = {10th Joint Meeting of the European Software Engineering Conference and the ACM SIGSOFT Symposium on the Foundations of Software Engineering (ESEC/FSE'15)},
+    publisher = {ACM},
+    year = 2015,
+    myconfname={ESEC/FSE'15},
+    pdf={papers/jitprof.pdf},
+    myconfurl={http://esec-fse15.dei.polimi.it/},
+}
+
+@inproceedings{SNGCfse15,
+    TITLE = {MultiSE: Multi-Path Symbolic Execution using Value Summaries},
+    AUTHOR = {Koushik Sen and George Necula and Liang Gong and Wontae Choi},
+    BOOKTITLE = {10th Joint Meeting of the European Software Engineering Conference and the ACM SIGSOFT Symposium on the Foundations of Software Engineering (ESEC/FSE'15)},
+    publisher = {ACM},
+    year = 2015,
+    myconfname={ESEC/FSE'15},
+    pdf={papers/multise.pdf},
+    myconfurl={http://esec-fse15.dei.polimi.it/},
+}
+
+@inproceedings{JSSCfse15,
+    TITLE = {MemInsight: Platform-Independent Memory Debugging for JavaScript},
+    AUTHOR = {Simon Jensen and Manu Sridharan and Koushik Sen and Satish Chandra},
+    BOOKTITLE = {10th Joint Meeting of the European Software Engineering Conference and the ACM SIGSOFT Symposium on the Foundations of Software Engineering (ESEC/FSE'15)},
+    publisher = {ACM},
+    year = 2015,
+    myconfname={ESEC/FSE'15},
+    pdf={papers/meminsight.pdf},
+    myconfurl={http://esec-fse15.dei.polimi.it/},
+}
+
+
+@inproceedings{GPSSissta15,
+    TITLE = {DLint: Dynamically Checking Bad Coding Practices in JavaScript},
+    AUTHOR = {Liang Gong and Michael Pradel and Manu Sridharan and Koushik Sen},
+    BOOKTITLE = {International Symposium on Software Testing and Analysis (ISSTA'15)},
+    publisher = {ACM},
+    year = 2015,
+    myconfname={ISSTA'15},
+    pdf={papers/dlint.pdf},
+    myconfurl={http://issta2015.cs.uoregon.edu/},
+}
+
+
+@inproceedings{PSecoop15,
+    TITLE = {The Good, the Bad, and the Ugly: An Empirical Study of Implicit Type Conversions in JavaScript},
+    AUTHOR = {Michael Pradel and Koushik Sen},
+    BOOKTITLE = {European Conference on Object-Oriented Programming (ECOOP'15)},
+    year = 2015,
+    myconfname={ECOOP'15},
+    myconfurl={http://2015.ecoop.org/},
+    pdf={papers/implicit.pdf},
+}
+
+
+@inproceedings{PSSicse15,
+    TITLE = {TypeDevil: Dynamic Type Inconsistency Analysis for JavaScript},
+    AUTHOR = {Michael Pradel and Parker Schuh and Koushik Sen},
+    BOOKTITLE = {37th International Conference on Software Engineering (ICSE'15)},
+    publisher={IEEE},
+    year = 2015,
+    myconfname={ICSE'15},
+    myconfurl={http://2015.icse-conferences.org/},
+    pdf={papers/typedevil.pdf},
+}
+
+@inproceedings{THZSicse15,
+    TITLE = {TesMa and CATG: Automated Test Generation Tools for Models of Enterprise Applications},
+    AUTHOR = {Haruto Tanno and Xiaojing Zhang and Hoshino Takashi and Koushik Sen},
+    BOOKTITLE = {37th International Conference on Software Engineering Demonstration Track (ICSE'15)},
+    publisher={IEEE},
+    year = 2015,
+    myconfname={ICSE'15},
+    myconfurl={http://2015.icse-conferences.org/},
+    pdf={papers/tesma.pdf},
+}
+@inproceedings{Nicst15,
+  TITLE={Generating Succinct Test Cases using Don’t Care Analysis},
+  AUTHOR = {Cuong Nguyen and Hiroaki Yoshida and Mukul Prasad and Indradeep Ghosh and Koushik Sen},
+  BOOKTITLE={IEEE International Conference on Software Testing, Verification and Validation (ICST'15)},
+  year=2015,
+  publisher = {IEEE},
+  myconfname={ICST'15},
+  myconfurl={http://icst2015.ist.tu-graz.ac.at/},
+    pdf={papers/dontcare.pdf},
+
+}
+
+
+@inproceedings{Cppopp15,
+    TITLE = {Barrier Elision for Production Parallel Programs},
+    AUTHOR = {Milind Chabbi and Wim Lavrijsen and Wibe de Jong and Koushik Sen and John Mellor-Crummey and Costin Iancu},
+    BOOKTITLE = {20th ACM SIGPLAN Symposium on Principles and Practice of Parallel Programming},
+    year = 2015,
+    publisher={ACM},
+    myconfname={PPoPP'15},
+    myconfurl={https://ppopp15.soe.ucsc.edu/},
+    pdf={papers/nwbar.pdf}
+}
+
+
+
+
+
+@inproceedings{PSNSoopsla14,
+    TITLE = {EventBreak: Analyzing the Responsiveness of User Interfaces through Performance-Guided Test Generation},
+    AUTHOR = {Michael Pradel and Parker Schuh and George Necula and Koushik Sen},
+    BOOKTITLE = {Annual Conference on Object-Oriented Programming, Systems, Languages, and Applications (OOPSLA'14)},
+    year = 2014,
+    publisher={ACM},  
+    myconfname={OOPSLA'14},
+    myconfurl={http://2014.splashcon.org/track/oopsla2014},
+    pdf={papers/eventbreak.pdf}
+
+}
+
+@inproceedings{Gicse14,
+    TITLE = {CodeHint: Dynamic and Interactive Synthesis of Code Snippets},
+    AUTHOR = {Joel Galenson and Philip Reames and Rastislav Bodik and Bjoern Hartmann and Koushik Sen},
+    BOOKTITLE = {36th International Conference on Software Engineering (ICSE'14)},
+    publisher={IEEE},
+    year = 2014,
+    pages = {653--663},
+    myconfname={ICSE'14},
+    myconfurl={http://2014.icse-conferences.org/},
+    pdf={papers/codehint.pdf},
+}
+
+@Article{CScacm13, 
+author = {Cristian Cadar and Koushik Sen},
+title = {Symbolic Execution for Software Testing: Three Decades Later},
+year = {2013},
+volume = {56},
+number = {2},
+pages = {82--90},
+month = {February},
+journal = {Communications of the ACM},
+publisher = {ACM Press},
+    myconfname={CACM},
+  myconfurl={http://cacm.acm.org/magazines/2013/2},
+    pdf={papers/cacm13.pdf}
+
+} 
+
+
+@inproceedings{SKBGfse13,
+    author={Koushik Sen and Swaroop Kalasapur and Tasneem Brutch and Simon Gibbs},
+    title={Jalangi: A Selective Record-Replay and Dynamic Analysis Framework for JavaScript},
+    booktitle={9th joint meeting of
+the European Software Engineering Conference and
+the ACM SIGSOFT Symposium
+on the Foundations of Software Engineering (ESEC/FSE'13)},
+    year= 2013,
+    publisher={ACM},
+    myconfname={FSE'13},
+    myconfurl={http://esec-fse.inf.ethz.ch/},
+    pdf={papers/jalangi.pdf},
+}
+
+@inproceedings{CNSoopsla13,
+    TITLE = {Guided GUI Testing of Android Applications with Minimal Restart and
+Approximate Learning},
+    AUTHOR = {Wontae Choi and George Necula and Koushik Sen},
+    BOOKTITLE = {Annual Conference on Object-Oriented Programming, Systems, Languages, and Applications (OOPSLA'13)},
+    year = 2013,
+    pages={623--640},
+    publisher={ACM},  
+    myconfname={OOPSLA'13},
+    myconfurl={http://splashcon.org/2013/},
+    pdf={papers/swifthand.pdf}
+
+}
+
+
+@inproceedings{Gsc13,
+    TITLE = {Precimonius: Tuning Assistant for Floating-Point Precision},
+    AUTHOR = {Cindy Rubio-Gonzalez and Cuong Nguyen and Hong Diep Nguyen and James Demmel and William Kahan and Koushik Sen and David H. Bailey and Costin Iancu and David Hough},
+    BOOKTITLE = {International Conference for High Performance Computing, Networking, Storage and Analysis (SC'13)},
+    publisher={ACM},  
+    year = 2013,
+    myconfname = {SC'13},
+    myconfurl={http://sc13.supercomputing.org/},
+    pdf={papers/precimonious.pdf}
+}
+
+
+
+
+@inproceedings{SKBGfsetool13,
+    author={Koushik Sen and Swaroop Kalasapur and Tasneem Brutch and Simon Gibbs},
+    title={Jalangi: A Tool Framework for Concolic Testing, Selective Record-Replay, and Dynamic Analysis of JavaScript},
+    booktitle={9th joint meeting of
+the European Software Engineering Conference and
+the ACM SIGSOFT Symposium
+on the Foundations of Software Engineering (ESEC/FSE'13)},
+    year= 2013,
+    publisher={ACM},
+    myconfname={FSE'13},
+    myconfurl={http://esec-fse.inf.ethz.ch/},
+    pdf={papers/jalangi-tool.pdf},
+    note = "(Tool Paper)"
+}
+
+
+@inproceedings{BENSpldi13,
+    TITLE = {CONCURRIT: A Domain Specific Language for Reproducing Concurrency Bugs},
+    AUTHOR = {Tayfun Elmas and Jacob Burnim and George Necula and Koushik Sen},
+    BOOKTITLE = {ACM SIGPLAN Conference on Programming Language Design and Implementation (PLDI'13)},
+    publisher={ACM},
+    year = 2013,
+    myconfname={PLDI'13},
+    myconfurl={http://pldi2013.ucombinator.org/},
+    pdf={papers/concurrit.pdf},
+
+}
+
+@inproceedings{PSIics13,
+    TITLE = {Scaling Data Race Detection for Partitioned Global Address Space Programs},
+    AUTHOR = {Chang-Seo Park and Koushik Sen and Costin Iancu},
+    BOOKTITLE = {27th International Conference on Supercomputing (ICS'13)},
+    year = 2013,
+    pages     = {47-58},    
+    publisher={ACM},
+    myconfname={ICS'13},
+    myconfurl={http://www.ics-conference.org/},
+    pdf={papers/thrille-exp.pdf}
+}
+
+@inproceedings{PSIppopp13,
+    TITLE = {Scaling Data Race Detection for Partitioned Global Address Space Programs (short paper)},
+    AUTHOR = {Chang-Seo Park and Koushik Sen and Costin Iancu},
+    BOOKTITLE = {18th ACM SIGPLAN Symposium on Principles and Practice of Parallel Programming},
+    year = 2013,
+    pages={305--306},
+    publisher={ACM},
+    myconfname={PPoPP'13},
+    myconfurl={http://ppopp2013.ics.uci.edu/},
+}
+
+@inproceedings{BENShotpar12,
+    TITLE = {CONCURRIT: Testing Concurrent Programs with Programmable State-Space Exploration},
+    AUTHOR = {Jacob Burnim and Tayfun Elmas and George Necula and Koushik Sen},
+    BOOKTITLE = {4th USENIX Workshop on Hot Topics in Parallelism (HotPar'12)},
+    year = 2012,
+    myconfname={HotPar'12},
+    myconfurl={https://www.usenix.org/conference/hotpar12/},
+    pdf={papers/concurrith.pdf}
+}
+
+
+@inproceedings{BENSppopp12,
+  author    = {Jacob Burnim and
+               Tayfun Elmas and
+               George C. Necula and
+               Koushik Sen},
+  title     = {NDetermin: Inferring Nondeterministic Sequential Specifications
+               for Parallelism Correctness (short paper)},
+  booktitle = {17th ACM SIGPLAN Symposium on Principles and Practice of Parallel Programming (PPOPP'12)},
+  year      = {2012},
+  pages     = {329--330},
+    publisher={ACM},
+    myconfname={PPOPP'12},
+    myconfurl={http://dynopt.org/ppopp-2012/},
+    pdf={papers/ndetermin.pdf}
+}
+
+
+@inproceedings{PSppopp12,
+  author    = {Chang-Seo Park and
+               Koushik Sen},
+  title     = {Concurrent Breakpoints (short paper)},
+  pages     = {331--332},
+  booktitle = {17th ACM SIGPLAN Symposium on Principles and Practice of Parallel Programming (PPOPP'12)},
+  year      = {2012},
+    publisher={ACM},
+    myconfname={PPOPP'12},
+    myconfurl={http://dynopt.org/ppopp-2012/},
+    pdf={papers/cbreak.pdf}
+}
+
+
+@inproceedings{JGSoopsla11,
+    TITLE = {PREFAIL: A Programmable Failure-Injection Framework},
+    AUTHOR = {Pallavi Joshi and Haryadi S. Gunawi and Koushik Sen},
+    BOOKTITLE = {Annual Conference on Object-Oriented Programming, Systems, Languages, and Applications (OOPSLA'11)},
+    year = 2011,
+    pages     = {171--188},
+    publisher={ACM},  
+    myconfname={OOPSLA'11},
+    myconfurl={http://splashcon.org/2011/cfp/due-april-08-2011/100-oopsla-research-papers},
+    pdf={papers/prefail.pdf}
+
+}
+
+@inproceedings{PHISsc11,
+    TITLE = {Efficient Data Race Detection for Distributed Memory Parallel Programs},
+    AUTHOR = {Chang-Seo Park and Koushik Sen and Paul Hargrove and Costin Iancu},
+    BOOKTITLE = {International Conference for High Performance Computing, Networking, Storage and Analysis (SC'11)},
+    pages     = {51},
+    publisher={ACM},  
+    year = 2011,
+    myconfname = {SC'11},
+    myconfurl={http://sc11.supercomputing.org/},
+    pdf={papers/upcthrille.pdf}
+}
+
+@inproceedings{Ssat11,
+    TITLE = {Concolic Testing and Constraint Satisfaction},
+    AUTHOR = {Koushik Sen},
+    BOOKTITLE = {14th International Conference on Theory and Applications of Satisfiability Testing (SAT'11)},
+    year = 2011,
+    note = "Invited Talk",
+    myconfname={SAT'11},
+    myconfurl={http://www.lri.fr/SAT2011/},
+}
+
+
+@inproceedings{JPPShotpar11,
+    TITLE = {RADBench: A Concurrency Bug Benchmark Suite},
+    AUTHOR = {Nicholas Jalbert and
+             Cristiano Pereira and
+             Gilles Pokam and
+             Koushik Sen},
+    BOOKTITLE = {3rd USENIX Workshop on Hot Topics in Parallelism (HotPar'11)},
+    year = 2011,
+    myconfname={HotPar'11},
+    myconfurl={http://www.usenix.org/event/hotpar11/},
+    pdf={papers/radbench.pdf}
+}
+
+
+@inproceedings{BENSpldi11,
+    TITLE = {NDSeq: Runtime Checking for Nondeterministic Sequential
+             Specifications of Parallel Correctness},
+    AUTHOR = {Jacob Burnim and Tayfun Elmas and George Necula and Koushik Sen},
+    BOOKTITLE = {ACM SIGPLAN Conference on Programming Language Design and Implementation (PLDI'11)},
+    publisher={ACM},
+    pages = "401--414",
+    year = 2011,
+    myconfname={PLDI'11},
+    myconfurl={http://pldi11.cs.utah.edu/},
+    pdf={papers/ndseq-lang.pdf},
+
+}
+
+@inproceedings{Cicse11,
+    TITLE = {Symbolic Execution for Software Testing in Practice -- Preliminary Assessment},
+    AUTHOR = {Cristian Cadar and Patrice Godefroid and Sarfraz Khurshid and Corina Pasareanu and Koushik Sen and Nikolai Tillmann and Willem Visser},
+    BOOKTITLE = {Impact Project Focus Area in 33rd International Conference on Software Engineering (ICSE'11)},
+    publisher={IEEE},
+    pages = "1066--1071",
+    year = 2011,
+    myconfname={IFA-ICSE'11},
+    myconfurl={http://2011.icse-conferences.org/content/impact-project-call},
+    pdf={papers/symbolic-impact.pdf},
+
+}
+
+@inproceedings{BNSasplos11,
+    TITLE = {Specifying and Checking Semantic Atomicity for
+          Multithreaded Programs},
+    AUTHOR = {Jacob Burnim and George Necula and Koushik Sen},
+    BOOKTITLE = {16th  International Conference on 
+Architectural Support for Programming Languages and Operating Systems (ASPLOS'11)},
+    year = 2011,
+    publisher={ACM},
+    pages     = {79--90},
+    myconfname={ASPLOS'11},
+    myconfurl={http://asplos11.cs.ucr.edu/},
+    pdf={papers/semantic-atomicity.pdf},
+
+}
+
+
+@inproceedings{Gnsdi11,
+    TITLE = {FATE and DESTINI: A Framework for Cloud Recovery Testing},
+    AUTHOR = {Haryadi S. Gunawi and Thanh Do and Pallavi Joshi and Peter Alvaro and Joseph M. Hellerstein and Andrea C. Arpaci-Dusseau and Remzi H. Arpaci-Dusseau and Koushik Sen and Dhruba Borthakur},
+    BOOKTITLE = {8th USENIX Symposium on Networked Systems Design and Implementation (NSDI'11)},
+    year = 2011,
+    myconfname={NSDI'11},
+    myconfurl={http://www.usenix.org/events/nsdi11/index.html},
+    pdf={papers/fate-destini.pdf},
+
+}
+
+@inproceedings{BSStacas11,
+    author={Jacob Burnim and Koushik Sen and Christos Stergiou},
+    title={Sound and Complete Monitoring of Sequential Consistency for Relaxed Memory Models},
+    booktitle={International Conference on
+Tools and Algorithms for the Construction
+ana Analysis of Systems (TACAS'11)},
+    year= 2011,
+  pages     = {11--25},
+    myconfname={TACAS'11},
+    myconfurl={http://research.microsoft.com/en-us/um/people/leino/tacas2011/},
+    pdf={papers/memmon.pdf},
+
+}
+
+
+@inproceedings{BSSissta11,
+    TITLE = {Testing Concurrent Programs on Relaxed Memory Models},
+    AUTHOR = {Jacob Burnim and Koushik Sen
+             Christos Stergiou},
+    BOOKTITLE = {International Symposium on Software Testing and Analysis (ISSTA'11)},
+    publisher = {ACM},
+    year = 2011,
+    myconfname={ISSTA'11},
+    pdf={papers/memtest.pdf},
+    myconfurl={http://issta11.unl.edu/},
+}
+
+
+@inproceedings{JGSfastwip11,
+    TITLE = {PreFail: Programmable and Efficient Failure Testing Framework},
+    AUTHOR = {Pallavi Joshi and Haryadi S. Gunawi and Koushik Sen},
+    BOOKTITLE = {Poster Sessions and Work-in-Progress Reports in 9th USENIX Conference on File and Storage Technologies (FAST/WIP'11)},
+    year = 2011,
+    myconfname={FAST'11/WiP},
+    myconfurl={http://www.usenix.org/events/fast11/activities.html},
+}
+
+@inproceedings{CDSYicst11,
+  TITLE={Optimal Test Input Sequence Generation for Finite State Models and Pushdown Systems},
+  AUTHOR = {Ajay Chander and Dinakar Dhurjati and Koushik Sen and Dachaun Yu},
+  BOOKTITLE={IEEE International Conference on Software Testing, Verification and Validation (ICST'11)},
+  year=2011,
+  pages = "140--149",
+  publisher = {IEEE},
+  myconfname={ICST'11},
+  myconfurl={http://sites.google.com/site/icst2011/},
+    pdf={papers/optseq.pdf},
+
+}
+
+@Article{BScacm10, 
+author = {Jacob Burnim and Koushik Sen},
+title = {Asserting and Checking Determinism for Multithreaded Programs},
+year = {2010},
+volume = {53},
+number = {6},
+pages = {97--105},
+month = {June},
+journal = {Communications of the ACM},
+publisher = {ACM Press},
+    myconfname={CACM},
+  myconfurl={http://cacm.acm.org/magazines/2010/6},
+
+} 
+
+
+@inproceedings{BSicse10,
+    TITLE = {DETERMIN: Inferring Likely Deterministic Specifications of Multithreaded Programs},
+    AUTHOR = {Jacob Burnim and Koushik Sen},
+    BOOKTITLE = {32nd International Conference on Software Engineering (ICSE'10)},
+    publisher={IEEE},
+    year = 2010,
+    myconfname={ICSE'10},
+    myconfurl={http://www.sbs.co.za/ICSE2010/},
+    pdf={papers/detinfer.pdf},
+    note="IFIP TC2 Manfred Paul Award for Excellence in Software: Theory and Practice"
+}
+
+@inproceedings{JNSGfse10,
+    author={Pallavi Joshi and Mayur Naik and Koushik Sen and David Gay},
+    title={An Effective Dynamic Analysis for Detecting Generalized Deadlocks},
+    booktitle={ACM SIGSOFT Eighteenth Symposium on the Foundations of Software Engineering (FSE'10)},
+    year= 2010,
+    publisher={ACM},
+    myconfname={FSE'10},
+    myconfurl={http://fse18.cse.wustl.edu/},
+    pdf={papers/waitnotifyFseCameraReady.pdf},
+}
+
+@inproceedings{JSfse10,
+    author={Nicholas Jalbert and Koushik Sen},
+    title={A Trace Simplification Technique for Effective Debugging of Concurrent Programs},
+    booktitle={ACM SIGSOFT Eighteenth Symposium on the Foundations of Software Engineering (FSE'10)},
+    year= 2010,
+    publisher={ACM},
+    myconfname={FSE'10},
+    myconfurl={http://fse18.cse.wustl.edu/},
+    pdf={papers/thrille.pdf},
+}
+
+@inproceedings{BNShotpar10,
+    TITLE = {Separating Functional and Parallel Correctness using
+             Nondeterministic Sequential Specifications},
+    AUTHOR = {Jacob Burnim and George Necula and and Koushik Sen},
+    BOOKTITLE = {2nd USENIX Workshop on Hot Topics in Parallelism (HotPar'10)},
+    year = 2010,
+    myconfname={HotPar'10},
+    myconfurl={http://www.usenix.org/events/hotpar10/},
+    pdf={papers/ndseq.pdf}
+}
+
+@inproceedings{Ghotdep10,
+    TITLE = {Towards Automatically Checking Thousands of Failures with Micro-specifications},
+    AUTHOR = {Haryadi S. Gunawi and Thanh Do and Pallavi Joshi and Joseph M. Hellerstein and Andrea C. Arpaci-Dusseau and Remzi H. Arpaci-Dusseau and Koushik Sen},
+    BOOKTITLE = {6th USENIX Workshop on Hot Topics in System Dependability (HotDep'10)},
+    year = 2010,
+    myconfname={HotDep'10},
+    myconfurl={http://www.usenix.org/events/hotdep10/},
+}
+
+
+@article{cacm09,
+  author    = {Krste Asanovic and
+               Rastislav Bod\'{\i}k and
+               James Demmel and
+               Tony Keaveny and
+               Kurt Keutzer and
+               John Kubiatowicz and
+               Nelson Morgan and
+               David A. Patterson and
+               Koushik Sen and
+               John Wawrzynek and
+               David Wessel and
+               Katherine A. Yelick},
+  title     = {A view of the parallel computing landscape},
+  journal   = {Communications of  ACM},
+  volume    = {52},
+  number    = {10},
+  year      = {2009},
+  pages     = {56-67},
+  myconfname={CACM},
+  myconfurl={http://cacm.acm.org/magazines/2009/10},
+  ee        = {http://doi.acm.org/10.1145/1562764.1562783},
+  bibsource = {DBLP, http://dblp.uni-trier.de}
+}
+
+@inproceedings{BSfse09,
+    author={Jacob Burnim and Koushik Sen},
+    title={Asserting and Checking Determinism for Multithreaded Programs},
+    booktitle={7th joint meeting of the European Software Engineering Conference
+and the ACM SIGSOFT Symposium on the Foundations of Software Engineering (ESEC/FSE'09)},
+    year= 2009,
+    pages="3--12",
+    publisher={ACM},
+    myconfname={FSE'09},
+    myconfurl={http://www.esec-fse-2009.ewi.tudelft.nl/},
+    pdf={papers/detcheck.pdf},
+    note = "ACM SIGSOFT Distinguished Paper Award.  Invited to CACM Research Highlights.",
+}
+
+
+@inproceedings{JNPScav09,
+  author = 	 {Pallavi Joshi and Mayur Naik and Chang-Seo Park and Koushik Sen}, 
+  title = 	 {An Extensible Active Testing Framework for Concurrent Programs},
+  booktitle = {21st International Conference on Computer Aided Verification (CAV'09)},
+  year = 2009,
+pages     = {675--681},
+volume    = {5643},
+  series = {Lecture Notes in Computer Science},
+  publisher = {Springer},
+    myconfname={CAV'09},
+    myconfurl={http://www-cav2009.imag.fr/},
+  pdf={papers/activetool.pdf},
+  URL = {http://srl.cs.berkeley.edu/~ksen/calfuzzer/},
+}
+
+
+
+@inproceedings{JPSNpldi09,
+    TITLE = {A Randomized Dynamic Program Analysis Technique for Detecting Real Deadlocks},
+    AUTHOR = {Pallavi Joshi and Chang-Seo Park and Koushik Sen and Mayur Naik},
+    BOOKTITLE = {ACM SIGPLAN Conference on Programming Language Design and Implementation (PLDI'09)},
+    publisher={ACM},
+pages     = {110--120},
+    year = 2009,
+    myconfname={PLDI'09},
+    myconfurl={http://www-plan.cs.colorado.edu/~pldi09/},
+    pdf = {papers/deadlock.pdf},
+    ps = {papers/deadlock.ps},
+}
+
+@inproceedings{NPSGicse09,
+    TITLE = {Effective Static Deadlock Detection},
+    AUTHOR = {Mayur Naik and Chang-Seo Park and Koushik Sen and David Gay},
+    BOOKTITLE = {31st International Conference on Software Engineering (ICSE'09)},
+    publisher={IEEE},
+  pages     = {386--396},
+    year = 2009,
+    myconfname={ICSE'09},
+    myconfurl={http://www.cs.uoregon.edu/events/icse2009/home/},
+    pdf={papers/staticdeadlock.pdf},
+    note = "ACM SIGSOFT Distinguished Paper Award"
+}
+
+@inproceedings{BJSicse09,
+    TITLE = {WISE: Automated Test Generation for Worst-Case Complexity},
+    AUTHOR = {Jacob Burnim and Sudeep Juvekar and Koushik Sen},
+    BOOKTITLE = {31st International Conference on Software Engineering (ICSE'09)},
+    publisher={IEEE},
+  pages     = {463--473},
+    year = 2009,
+    myconfname={ICSE'09},
+    myconfurl={http://www.cs.uoregon.edu/events/icse2009/home/},
+    pdf={papers/perftest.pdf}
+}
+
+@inproceedings{BJSSase09,
+    author={Jacob Burnim and Nicholas Jalbert and Christos Stergiou and Koushik Sen},
+    title={Looper: Lightweight Detection of Infinite Loops at Runtime},
+    booktitle={24th IEEE/ACM nternational Conference on Automated Software Engineering (ASE'09) },
+    year= 2009,
+    publisher={IEEE},
+    myconfname={ASE'09},
+    myconfurl={https://www.se.auckland.ac.nz/conferences/ase09/},
+    pdf={papers/nonterm.pdf},
+    ps={papers/nonterm.ps},
+}
+
+
+
+
+@inproceedings{CJSfase09,
+    TITLE = {SNIFF: A Search Engine for Java using Free-Form Queries},
+    AUTHOR = {Shaunak Chatterjee and Sudeep Juvekar and Koushik Sen},
+    BOOKTITLE = {Fundamental Approaches to Software Engineering (FASE'09)},
+  volume    = {5503},
+  pages     = {385--400},
+    year = 2009,
+    myconfname={FASE'09},
+    myconfurl={http://www.pst.ifi.lmu.de/fase2009/},
+    pdf={papers/sniff.pdf},
+}
+
+
+@inproceedings{PSfse08,
+    author={Chang-Seo Park and Koushik Sen},
+    title={Randomized Active Atomicity Violation Detection in Concurrent Programs},
+    booktitle={16th International Symposium on Foundations of Software Engineering (FSE'08)},
+    year= 2008,
+  pages     = {135--145},
+    publisher={ACM},
+    myconfname={FSE'08},
+    myconfurl={http://www.cc.gatech.edu/conferences/fse16/},
+    pdf={papers/atomviol.pdf},
+}
+
+
+@inproceedings{Spldi08,
+    author={Koushik Sen},
+    title={Race Directed Random Testing of Concurrent Programs},
+    booktitle={ACM SIGPLAN Conference on
+Programming Language Design and Implementation (PLDI'08)},
+    year= 2008,
+    pages="11--21",
+    publisher={ACM},
+    myconfname={PLDI'08},
+    myconfurl={http://pldi2008.cs.ucr.edu/},
+    pdf={papers/raced.pdf},
+    ps={papers/raced.ps},
+}
+
+@techreport{Asanovic:EECS-2008-23,
+    Author = {Asanovic, Krste and Bodik, Ras and Demmel, James and Keaveny, Tony and Keutzer, Kurt and Kubiatowicz, John D. and Lee, Edward A. and Morgan, Nelson and Necula, George and Patterson, David A. and Sen, Koushik and Wawrzynek, John and Wessel, David and Yelick, Katherine A.},
+    Title = {The Parallel Computing Laboratory at U.C. Berkeley: A Research Agenda Based on the Berkeley View},
+    Institution = {EECS Department, University of California, Berkeley},
+    Year = {2008},
+    Month = {Mar},
+    URL = {http://www.eecs.berkeley.edu/Pubs/TechRpts/2008/EECS-2008-23.html},
+    Number = {UCB/EECS-2008-23}
+}
+
+@inproceedings{BSase08b,
+    author={Jacob Burnim and Koushik Sen},
+    title={Heuristics for Scalable Dynamic Test Generation},
+    booktitle={23rd IEEE/ACM nternational Conference on Automated Software Engineering (ASE'08) },
+    year= 2008,
+    pages     = {443-446},
+    publisher={IEEE},
+    myconfname={ASE'08},
+    myconfurl={http://www.di.univaq.it/ase2008/},
+    pdf={papers/cfgcute.pdf},
+    ps={papers/cfgcute.ps},
+    tr={http://www.eecs.berkeley.edu/Pubs/TechRpts/2008/EECS-2008-123.pdf}
+}
+
+@inproceedings{JSase08a,
+    author={Pallavi Joshi and Koushik Sen},
+    title={Predictive Typestate Checking of Multithreaded Java Programs},
+    booktitle={23rd IEEE/ACM nternational Conference on Automated Software Engineering (ASE'08) },
+    pages     = {288-296},
+    year= 2008,
+    publisher={IEEE},
+    myconfname={ASE'08},
+    myconfurl={http://www.di.univaq.it/ase2008/},
+    pdf={papers/ASE.pdf},
+    ps={papers/ASE.ps},
+}
+
+
+@inproceedings{KSissta08,
+    author={Yamini Kannan and Koushik Sen},
+    title={Universal Symbolic Execution and its Application to Likely Data Structure Invariant Generation},
+    booktitle={International Symposium on Software Testing and Analysis (ISSTA'08)},
+    year= 2008,
+  pages     = {283-294},
+    publisher={ACM},
+    myconfname={ISSTA'08},
+    myconfurl={http://issta08.rutgers.edu/},
+    pdf={papers/dsinv.pdf},
+}
+
+@inproceedings{RSGJsas08,
+    author={Murali Krishna Ramanathan and Koushik Sen and Ananth Grama and Suresh Jagannathan},
+    title={Protocol Inference Using Static Path Profiles},
+    booktitle={15th International Static Analysis Symposium (SAS'08)},
+    year= 2008,
+  pages     = {78-92},
+  publisher = {Springer},
+  series    = {Lecture Notes in Computer Science},
+  volume    = {5079},
+    myconfname={SAS'08},
+    myconfurl={http://www.dsic.upv.es/~sas2008/},
+    pdf={papers/sequence.pdf},
+}
+
+
+
+@inproceedings{CSHfossacs08,
+    author={Krishnendu Chatterjee and Koushik Sen and Thomas Henzinger},
+    title={Model-Checking omega-Regular Properties of Interval Markov Chains},
+    booktitle={11th International Conference on
+Foundations of Software Science and Computation Structures (FoSSaCS'08)},
+    year= 2008,
+  series = {Lecture Notes in Computer Science},
+  publisher = {Springer},
+  pages="302--317",
+  volume=4962,
+    myconfname={FoSSaCS'08},
+    myconfurl={http://fossacs08.pps.jussieu.fr/},
+    mycategory = 2,
+    ps={papers/fossacs08.ps},
+    pdf={papers/fossacs08.pdf},
+}
+
+
+@inproceedings{Sase07b,
+    author={Koushik Sen},
+    title={Concolic Testing},
+    booktitle={22nd IEEE/ACM nternational Conference on Automated Software Engineering (ASE'07) },
+    year= 2007,
+    pages="571--572",
+    myconfname={ASE'07},
+    publisher={IEEE},
+    myconfurl={http://www.cse.msu.edu/ase2007/},
+    pdf={papers/cutetut.pdf},
+    ps={papers/cutetut.ps},
+}
+
+
+@inproceedings{Sase07,
+    author={Koushik Sen},
+    title={Effective Random Testing of Concurrent Programs},
+    booktitle={22nd IEEE/ACM nternational Conference on Automated Software Engineering (ASE'07) },
+    year= 2007,
+    pages="323--332",
+    publisher={IEEE},
+    myconfname={ASE'07},
+    myconfurl={http://www.cse.msu.edu/ase2007/},
+    pdf={papers/fuzzpar.pdf},
+    ps={papers/fuzzpar.ps},
+}
+
+@inproceedings{JSSfse07,
+    author={Pallavi Joshi and Koushik Sen and Mark Shlimovich},
+    title={Predictive Testing: Amplifying the Effectiveness of Software Testing (Poster Paper)},
+    booktitle={6th joint meeting of the European Software Engineering Conference and 
+               ACM SIGSOFT Symposium on the Foundations of Software Engineering (ESEC/FSE'07) },
+    year= 2007,
+      pages     = {561-564},
+    publisher={ACM},
+    myconfname={ESEC/FSE'07},
+    myconfurl={http://www.idt.mdh.se/esec-fse-2007/},
+    tr={http://www.eecs.berkeley.edu/Pubs/TechRpts/2007/EECS-2007-35.pdf},
+}
+
+@inproceedings{EMSissta07,
+    TITLE = {Dynamic Test Input
+  Generation for Database Applications},
+    AUTHOR = {Michael Emmi and Rupak Majumdar and Koushik Sen},
+    BOOKTITLE = {International
+    Symposium on Software Testing and Analysis (ISSTA'07)},
+    publisher={ACM},
+      pages     = {151-162},
+    year = 2007,
+    myconfname={ISSTA'07},
+    myconfurl={http://www.cse.unl.edu/issta07/},
+    pdf={papers/cutesql.pdf},
+    pdf={papers/cutesql.ps},
+}
+
+@inproceedings{MSicse07,
+    TITLE = {Hybrid Concolic Testing},
+    AUTHOR = {Rupak Majumdar and Koushik Sen},
+    BOOKTITLE = {29th International Conference on Software Engineering (ICSE'07)},
+    pages="416--426",
+    publisher={IEEE},
+    year = 2007,
+    myconfname={ICSE'07},
+    myconfurl={http://web4.cs.ucl.ac.uk/icse07/},
+    ps={papers/hybrid.ps},
+    pdf={papers/hybrid.pdf},
+    slides={slides/icse07.ppt},
+}
+
+
+@ARTICLE{RSccpe07,
+  AUTHOR =       {Grigore Ro\c{s}u and Koushik Sen},
+  TITLE =        {An Instrumentation Technique for Online Analysis of Multithreaded Programs},
+  JOURNAL =         {Special Issue of Concurrency and Computation: Practice and Experience (CC:PE)},
+  volume    = {19},
+  number    = {3},
+  year      = {2007},
+  pages     = {311--325},  
+    myconfname={CC:PE},
+    myconfurl={http://www3.interscience.wiley.com/cgi-bin/jhome/77004395},
+    ps={papers/causality-j.ps},
+    pdf={papers/causality-j.pdf},
+}
+
+
+@inproceedings{SAhvc06,
+  author = 	 {Koushik Sen and Gul Agha}, 
+  title = 	 {A Race-Detection and Flipping Algorithm for Automated Testing of Multi-Threaded Programs},
+  booktitle = { Haifa verification conference 2006 (HVC'06)},
+  year = 2006,
+  volume=4383,
+  pages="166--182",
+  series = {Lecture Notes in Computer Science},
+  publisher = {Springer},
+    myconfname={HVC'06},
+    myconfurl={http://www.haifa.ibm.com/Workshops/verification2006/},
+  ps={papers/ccute-haifa.ps},
+}
+
+@inproceedings{SVcav06,
+  author = 	 {Koushik Sen and Mahesh Viswanathan}, 
+  title = 	 {Model Checking Multithreaded Programs with Asynchronous Atomic Methods},
+  booktitle = {18th International Conference on Computer Aided Verification (CAV'06)},
+  year = 2006,
+  series = {Lecture Notes in Computer Science},
+  publisher = {Springer},
+  pages = "300--314",
+  volume = 4144,
+    myconfname={CAV'06},
+    myconfurl={http://research.microsoft.com/floc06/cav.htm},
+  ps={papers/multiset.ps},
+  pdf={papers/multiset.pdf},
+  tr = {papers/multiset-tr.pdf},
+}
+
+@inproceedings{SAcav06,
+  author = 	 {Koushik Sen and Gul Agha}, 
+  title = 	 {CUTE and jCUTE : Concolic Unit Testing and Explicit Path Model-Checking Tools},
+  booktitle = {18th International Conference on Computer Aided Verification (CAV'06)},
+  year = 2006,
+  series = {Lecture Notes in Computer Science},
+  publisher = {Springer},
+  volume = 4144,
+  pages = "419--423",
+    myconfname={CAV'06},
+    myconfurl={http://research.microsoft.com/floc06/cav.htm},
+  ps={papers/cuteTool.ps},
+  pdf={papers/cuteTool.pdf},
+}
+
+@phdthesis{Sphd2006,
+  author = 	 {Koushik Sen},
+  title = 	 {Scalable Automated Methods for Dynamic Program Analysis},
+  booktitle = {Ph.D. Thesis},
+  school = 	 {University of Illinois at Urbana-Champaign},
+  year = 	 {2006},
+  month = 	 {June},
+  ps={papers/sen-phd.ps},
+  pdf={papers/sen-phd.pdf},
+}
+
+
+@inproceedings{SVAtacas06,
+    author={Koushik Sen and Mahesh Viswanathan and Gul Agha},
+    title={Model-Checking {M}arkov Chains in the presence of
+  Uncertainties},
+    booktitle={12th International Conference on Tools and
+    Algorithms for the Construction and Analysis of Systems (TACAS'06)},
+    year= 2006,
+    pages = "394--410",
+    volume = 3920,
+  series = {Lecture Notes in Computer Science},
+  publisher = {Springer},
+    myconfname={TACAS'06},
+    myconfurl={http://depend.cs.uni-sb.de/index.php?id=329},
+    mycategory = 2,
+    pdf={papers/udtmc-final.pdf},
+    tr={papers/udtmc-final-tr.pdf},
+}
+
+
+@inproceedings{SAfase06,
+    author={Koushik Sen and Gul Agha},
+    title={Automated Systematic Testing of Open Distributed Programs},
+    booktitle={International Conference on Fundamental Approaches to Software Engineering (FASE'06) (ETAPS'06
+  conference)},
+    pages = "339--356",
+    volume = 3922,
+    year= 2006,
+  series = {Lecture Notes in Computer Science},
+  publisher = {Springer},
+    myconfname={FASE'06},
+    myconfurl={http://www.elet.polimi.it/conferences/fase06/},
+    mycategory = 1,
+    pdf={papers/dcute.pdf},
+    tr={papers/dcute-tr.pdf},
+}
+
+@ARTICLE{AMSqaplentcs05,
+  author =       {Gul Agha and Jos\'{e} Meseguer and Koushik Sen},
+  title =        {{PM}aude: Rewrite-based Specification Language for Probabilistic Object Systems},
+  journal =    {Electronic Notes in Theoretical Computer Science},
+  volume = "153",
+  number ="2",
+  pages = "213--239",  
+  year =         {2006},
+    publisher={Elsevier Science},
+    noteextra = {Expanded version of the paper that appeared in Proceedings of the 3rd Workshop on
+Quantitative Aspects of Programming Languages},
+    myconfname={ENTCS},
+    myconfurl={http://www.elsevier.com/wps/find/journaldescription.cws_home/681021/description#description},
+    ps={papers/pmaude-post.ps},
+    pdf={papers/pmaude-post.pdf},
+}
+
+
+
+@ARTICLE{SRAsttt06,
+  AUTHOR =       {Koushik Sen and Grigore Ro\c{s}u and Gul Agha},
+  TITLE =        {Online Efficient Predictive Safety Analysis of Multithreaded Programs},
+  JOURNAL =      "International Journal on Software Technology and Tools Transfer (STTT)",
+  volume    = {8},
+  number    = {3},
+  year      = {2006},
+  pages     = {248--260},  
+    myconfname={STTT},
+    myconfurl={http://sttt.cs.uni-dortmund.de/},
+    ps={papers/jmpax-sttt.ps},
+    pdf={papers/jmpax-sttt.pdf},
+}
+
+
+@inproceedings{SVARnsfngs06,
+    TITLE = {Decentralized Runtime Analysis of Multithreaded Applications},
+    AUTHOR = {Koushik Sen and Abhay Vardhan and Gul Agha and and Grigore Ro\c{s}u},
+    BOOKTITLE = {NSF Next Generation Software Program Workshop (NSFNGS'06) (Satellite Workshop of IPDPS'06)},
+    publisher={IEEE Digital Library},
+    year = 2006,
+    myconfname={NSFNGS'06},
+    myconfurl={http://www.ipdps.org/ipdps2006/2006_workshops.html},
+    ps={papers/workshop.ps},
+    pdf={papers/workshop.pdf},
+}
+
+
+
+
+@inproceedings{SMAfse05,
+    author={Koushik Sen and Darko Marinov and Gul Agha},
+    title={{CUTE}: A Concolic Unit Testing Engine for {C}},
+    booktitle={5th joint meeting of the European Software Engineering Conference and 
+               ACM SIGSOFT Symposium on the Foundations of Software Engineering (ESEC/FSE'05) },
+    pages = "263--272",
+    year= 2005,
+    publisher={ACM},
+    myconfname={ESEC/FSE'05},
+    myconfurl={http://esecfse05.di.fct.unl.pt/},
+    ps={papers/C159-sen.ps},
+    pdf={papers/C159-sen.pdf},
+    tr={papers/cute-tr.pdf},
+    slides = {slides/fse05.ppt},
+    note={ACM SIGSOFT Distinguished Paper Award},
+}
+
+@inproceedings{GKSpldi05,
+  AUTHOR =       {Patrice Godefroid and Nils Klarlund and Koushik Sen},
+  TITLE =        {{DART}: Directed Automated Random Testing},
+  BOOKTITLE = {ACM SIGPLAN 2005 Conference on Programming Language Design and Implementation (PLDI'05)},
+  pages = "213--223",
+  year=2005,
+    myconfname={PLDI'05},
+    myconfurl={http://research.ihost.com/pldi2005/},
+    ps={papers/dart.ps},
+    pdf={papers/dart.pdf},
+    slides={slides/dart-fm.ppt},
+}
+
+@inproceedings{SVAcav05,
+  AUTHOR =       {Koushik Sen and Mahesh Viswanathan and Gul Agha},
+  TITLE =        {On Statistical Model Checking of Stochastic Systems},
+  booktitle = {17th International Conference on Computer Aided Verification (CAV'05)},
+  year = 2005,
+  pages = "266--280",
+  series = {Lecture Notes in Computer Science},
+  publisher = {Springer},
+  volume = 3576,
+    myconfname={CAV'05},
+    myconfurl={http://www.cav2005.inf.ed.ac.uk/},
+    ps={papers/dtmc-cav.ps},
+    pdf={papers/dtmc-cav.pdf},
+    slides={slides/cav05.ppt},
+}
+
+@inproceedings{fcs05,
+    author={Gul Agha and Carl Gunter and Michael Greenwald and Sanjeev Khanna and Jos\'{e} Meseguer and Koushik Sen and Prasanna Thati},
+    title={Formal Modeling and Analysis of {DoS} Using Probabilistic Rewrite Theories},
+    booktitle={International Workshop on Foundations of Computer Security (FCS'05) (Affiliated with LICS'05)},
+    year=2005,
+    myconfname={FCS'05},
+    myconfurl={http://www.cs.chalmers.se/~andrei/FCS05/},
+    ps={papers/fcs-final.ps},
+    pdf={papers/fcs-final.pdf},
+    slides={slides/fcs.ppt},
+}
+
+
+@ARTICLE{tcs04,
+  AUTHOR =       "Cyrille Artho and Howard Barringer and Allen Goldberg and Klaus Havelund and Sarfraz Khurshid and Mike Lowry and Corina Pasareanu and Grigore Ro\c{s}u and Koushik Sen and Willem Visser and Rich Washington",
+  TITLE =        "Combining Test Case Generation and Runtime Verification",
+  JOURNAL =      "Theoretical Computer Science",
+  volume = "336",
+  number = "2--3",
+  pages = "209--234",
+  month = may,
+  YEAR =         "2005",
+    myconfname={TCS},
+    myconfurl={http://www.elsevier.com/locate/tcs},
+    ps={papers/main.ps},
+    pdf={papers/main.pdf},
+}
+
+
+
+@inproceedings{SVAqest05,
+  AUTHOR =       {Koushik Sen and Mahesh Viswanathan and Gul Agha},
+  TITLE =        {{VESTA}: A Statistical Model Checker and Analyzer for Probabilistic Systems},
+  booktitle={2nd International Conference on Quantitative Evaluation of Systems (QEST'05)},
+  year=2005,
+  pages = "251--252",
+  publisher = {IEEE},
+    myconfname={QEST'05},
+    myconfurl={http://www.qest.org/},
+    ps={papers/vesta.ps},
+    pdf={papers/vesta.pdf},
+    slides={slides/qest05.ppt},
+}
+
+@inproceedings{VSVAtacas05,
+  AUTHOR =       {Abhay Vardhan and Koushik Sen and Mahesh Viswanathan and Gul Agha},
+  TITLE =        {Using Language Inference to Verify omega-regular Properties},
+  BOOKTITLE = {11th International Conference on Tools and Algorithms for the Construction and Analysis of Systems (TACAS'05)},
+  year=2005,
+  publisher = {Springer},
+  pages="45--60",
+  volume="3440",
+  series={Lecture Notes in Computer Science},
+    myconfname={TACAS'05},
+    myconfurl={http://www-verimag.imag.fr/TACAS2005.html},
+    ps={papers/omega_e.ps},
+    pdf={papers/omega_e.pdf},
+ }
+
+
+@inproceedings{SRAfmoods05,
+  TITLE = {Detecting Errors in Multithreaded Programs by Generalized Predictive Analysis of Executions},
+  AUTHOR = {Koushik Sen and Grigore Ro\c{s}u and Gul Agha},
+  BOOKTITLE = {7th IFIP International Conference on Formal Methods for Open Object-Based Distributed Systems (FMOODS'05)},
+  year = 2005,
+  series = {Lecture Notes in Computer Science},
+  publisher = {Springer},
+  volume = 3535,
+  pages = "211--226",
+    myconfname={FMOODS'05},
+    myconfurl={http://www.informatik.uni-kiel.de/~fmoods05/},
+    ps={papers/ww-fmoods.ps},
+    pdf={papers/ww-fmoods.pdf},
+  }
+
+
+
+
+@CONFERENCE{AMSqapl05,
+  author =       {Gul Agha and Jos\'{e} Meseguer and Koushik Sen},
+  title =        {{PM}aude: Rewrite-based Specification Language for Probabilistic Object Systems},
+  booktitle =    {3rd International Workshop on Quantitative Aspects of Programming Languages (QAPL'05)},
+  year =         {2005},
+    myconfname={QAPL'05},
+    myconfurl={http://www.doc.ic.ac.uk/~qapl05/},
+    ps={papers/pmaude.ps},
+    pdf={papers/pmaude.pdf},
+}
+
+@inproceedings{VSVAfsttcs04,
+  AUTHOR =       {Abhay Vardhan and Koushik Sen and Mahesh Viswanathan and Gul Agha},
+  TITLE =        {Actively Learning to Verify Safety for FIFO Automata},
+  BOOKTITLE = {24th Conference on Foundations of Software Technology and Theoretical Computer Science (FSTTCS'04)},
+  year=2004,
+  pages="494--505",
+  volume="3328",
+  publisher = {Springer},
+  series={Lecture Notes in Computer Science},
+    myconfname={FSTTCS'04},
+    myconfurl={http://www.fsttcs.org/},
+    ps={papers/activeFifo.ps},
+    pdf={papers/activeFifo.pdf},
+    tr={papers/activeFifo-tr.pdf},
+}
+
+
+@inproceedings{VSVAicfem04,
+  AUTHOR =       {Abhay Vardhan and Koushik Sen and Mahesh Viswanathan and Gul Agha},
+  TITLE =        {Learning to Verify Safety Properties},
+  BOOKTITLE= {6th International Conference on Formal Engineering Methods (ICFEM'04)},
+  year=2004,
+  pages="274--289",
+  volume="3308",
+  publisher = {Springer},
+  series={Lecture Notes in Computer Science},
+    myconfname={ICFEM'04},
+    myconfurl={http://research.microsoft.com/icfem2004/},
+    ps={papers/cfsmLearn.ps},
+    pdf={papers/cfsmLearn.pdf},
+}
+
+
+@inproceedings{SVAqest04,
+  AUTHOR =       {Koushik Sen and Mahesh Viswanathan and Gul Agha},
+  TITLE =        {Learning Continuous Time Markov Chains from Sample Executions},
+  booktitle={1st International Conference on Quantitative Evaluation of Systems (QEST'04)},
+  year=2004,
+  pages="146--155",
+  publisher = {IEEE},
+    myconfname={QEST'04},
+    myconfurl={http://www.qest.org/},
+    ps={papers/ctmc.ps},
+    pdf={papers/ctmc.pdf},
+    slides={slides/learnCTMC.pdf},
+}
+
+
+@inproceedings{NSTforte04,
+  AUTHOR =       {Prasad Naldurg and Koushik Sen and Prasanna Thati},
+  TITLE =        {A Temporal Logic Based Approach to Intrusion Detection},
+  booktitle = {24th IFIP WG 6.1 International Conference on Formal Techniques for Networked and Distributed Systems (FORTE'04)},
+  year=2004,
+  volume="3235",
+  pages="359-376",
+  publisher = {Springer},
+  series={Lecture Notes in Computer Science},
+    myconfname={FORTE'04},
+    myconfurl={http://antares.sip.ucm.es/~forte2004/},
+    ps={papers/intrusion.ps},
+    pdf={papers/intrusion.pdf},
+}
+
+@inproceedings{SVAcav04,
+  AUTHOR =       {Koushik Sen and Mahesh Viswanathan and Gul Agha},
+  TITLE =        {Statistical Model Checking of Black-Box Probabilistic Systems},
+  booktitle = {16th International Conference on Computer Aided Verification (CAV'04)},
+  year = 2004,
+  series = {Lecture Notes in Computer Science},
+  volume = 3114,
+  pages = "202--215",
+  publisher = {Springer},
+    myisselected = {true},
+    myconfname={CAV'04},
+    myconfurl={http://www.dcs.warwick.ac.uk/CAV/},
+    ps={papers/statver.ps},
+    pdf={papers/statver.pdf},
+    slides={slides/cav04.ppt},
+    tr={papers/response.pdf},
+}
+
+
+@inproceedings{SVARicse04,
+    TITLE = {Efficient Decentralized Monitoring of Safety in Distributed Systems},
+    AUTHOR = {Koushik Sen and Abhay Vardhan and Gul Agha and and Grigore Ro\c{s}u},
+    BOOKTITLE = {26th International Conference on Software Engineering (ICSE'04)},
+    publisher={IEEE},
+    pages="418--427",
+    year = 2004,
+    myconfname={ICSE'04},
+    myconfurl={http://conferences.iee.org/icse2004/},
+    myspecial= {Extended version invited for publication in ACM Transactions on Software Engineering and Methodology (TOSEM)},
+    ps={papers/sen_k.ps},
+    pdf={papers/sen_k.pdf},
+    slides={slides/icse.ppt},
+}
+
+@inproceedings{SRAtacas04,
+  TITLE = {Online Efficient Predictive Safety Analysis of Multithreaded Programs},
+  AUTHOR = {Koushik Sen and Grigore Ro\c{s}u and Gul Agha},
+  BOOKTITLE = {10th International Conference on Tools and Algorithms for the
+  Construction and Analysis of Systems (TACAS'04)},
+  year = 2004,
+  series = {Lecture Notes in Computer Science},
+  volume = 2988,
+  pages = "123--138",
+    myconfname={TACAS'04},
+    myconfurl={http://www.daimi.au.dk/~cpn/tacas04/},
+    ps={papers/tacas-jmpax.ps},
+    pdf={papers/tacas-jmpax.pdf},
+}
+
+
+@inproceedings{SVARwoda04,
+  AUTHOR =       {Koushik Sen and Abhay Vardhan and Gul Agha and and Grigore Ro\c{s}u},
+  TITLE =        {On Specifying and Monitoring Epistemic Properties of Distributed Systems},
+  booktitle = {2nd International Workshop on Dynamic Analysis (WODA'04), Satellite workshop of ICSE 2004},
+  year = {2004},
+  pages="32--35",
+  publisher = {British Institution of Electrical Engineers (IEE)},
+    myconfname={WODA'04},
+    myconfurl={http://www.cs.virginia.edu/woda2004/},
+    ps={papers/distvalue.ps},
+    pdf={papers/distvalue.pdf},
+    slides={slides/woda.ppt},
+}
+
+
+
+@INPROCEEDINGS{RSpadtad04,
+  AUTHOR =       {Grigore Ro\c{s}u and Koushik Sen},
+  TITLE =        {An Instrumentation Technique for Online Analysis of Multithreaded Programs},
+  BOOKTITLE =    {International Workshop on Parallel and Distributed Systems: Testing and Debugging (PADTAD'04) (Satellite
+workshop of IPDPS'04)},
+    publisher={IEEE digital library},
+  YEAR =         {2004},
+  myspecial =         {\emph{Invited Lecture}},
+    myconfname={PADTAD'04},
+    myconfurl={http://www.haifa.il.ibm.com/Workshops/PADTAD2004/},
+    ps={papers/c.ps},
+    pdf={papers/c.pdf},
+}
+
+@inproceedings{BGHSpadtad04,
+    TITLE = {Program Monitoring with LTL in EAGLE},
+    AUTHOR = {Howard Barringer and Allen Goldberg and Klaus Havelund and Koushik Sen},
+    BOOKTITLE = {International Workshop on Parallel and Distributed Systems: Testing and Debugging (PADTAD'04) (Satellite workshop of IPDPS'04)},
+    publisher={IEEE digital library},
+    year = 2004,
+    myconfname={PADTAD'04},
+    myconfurl={http://www.haifa.il.ibm.com/Workshops/PADTAD2004/},
+    ps={papers/padtad.ps},
+    pdf={papers/padtad.pdf},
+}
+
+
+@inproceedings{BGHSvmcai04,
+    author={Howard Barringer and Allen Goldberg and Klaus Havelund and Koushik Sen},
+    title={Rule-Based Runtime Verification},
+    booktitle={5th International Conference on Verification, Model Checking
+        and Abstract Interpretation (VMCAI'04)},
+    year={2004},
+    publisher={Springer},
+    series={Lecture Notes in Computer Science},
+    volume=2937,
+    pages={44--57},
+    myconfname={VMCAI'04},
+    myconfurl={http://www.dsi.unive.it/~vmcai04/},
+    ps={papers/observer.ps},
+    pdf={papers/observer.pdf},
+}
+
+@inproceedings{SRAfse03,
+    author={Koushik Sen and Grigore Ro\c{s}u and Gul Agha},
+    title={{Runtime Safety Analysis of Multithreaded Programs}},
+    booktitle={9th European Software Engineering Conference and 11th ACM SIGSOFT International
+        Symposium on the Foundations of Software Engineering (ESEC/FSE'03)},
+    year= 2003,
+    publisher={ACM},
+    pages={337--346},
+    myconfname={FSE/ESEC'03},
+    myconfurl={http://esecfse.cs.helsinki.fi/},
+    ps={papers/p108-sen.ps},
+    pdf={papers/p108-sen.pdf},
+    slides={slides/fse03.ppt},
+}
+
+@inproceedings{SRAasian03,
+    author = {Koushik Sen and Grigore Ro\c{s}u and Gul Agha},
+    title = {Generating Optimal Linear Temporal Logic Monitors by Coinduction},
+    booktitle={8th Asian Computing Science Conference (ASIAN'03)},
+    year={2003},
+    publisher={Springer},
+    series={Lecture Notes in Computer Science},
+    volume=2896,
+    pages={260--75},
+    myconfname={ASIAN'03},
+    myconfurl={http://www.cse.psu.edu/asian03/},
+    ps={papers/ltl2dfa.ps},
+    pdf={papers/ltl2dfa.pdf},
+    slides={slides/asian-ltl.ppt},
+}
+
+@MASTERSTHESIS{Sms03,
+  AUTHOR =       {Koushik Sen},
+  TITLE =        {Predictive Safety Analysis of Concurrent Programs},
+    booktitle={Master's Thesis},
+  SCHOOL =       {University of Illinois at Urbana-Champaign},
+  YEAR =         2003,
+  month =        {May},
+  noteextra = {Supervisor: Gul Agha},
+  ps={papers/ms.ps},
+  pdf={papers/ms.pdf},
+}
+
+
+
+@inproceedings{KSMAfmoods03,
+    author={Nirman Kumar and Koushik Sen and Jos\'{e} Meseguer and Gul Agha},
+    title={A Rewriting Based Model for Probabilistic Distributed Object Systems},
+    booktitle={6th IFIP International Conference on Formal Methods for Open
+        Object-based Distributed Systems (FMOODS'03)},
+    year={2003},
+    publisher={Springer},
+    series={Lecture Notes in Computer Science},
+    volume=2884,
+    pages={32--46},
+    myconfname={FMOODS'03},
+    myconfurl={http://fedconf.enst.fr/},
+    ps={papers/fmoods.ps},
+    pdf={papers/fmoods.pdf},
+}
+
+@inproceedings{SRrv03,
+    author={Koushik Sen and Grigore Ro\c{s}u},
+    title={{Generating Optimal Monitors for Extended Regular Expressions}},
+    booktitle={ 3rd International Workshop on Runtime Verification (RV'03)},
+    year= 2003,
+    publisher={Elsevier Science},
+    volume={89(2)},
+    series={Electronic Notes in Theoretical Computer Science},
+    myconfname={RV'03},
+    myconfurl={http://www.cis.upenn.edu/rv2003/},
+    ps={papers/opt-ere-mon.ps},
+    pdf={papers/opt-ere-mon.pdf},
+}
+
+
+
+@inproceedings{TSMwrla02,
+    author={Prasanna Thati and Koushik Sen and Narciso Marti Oliet},
+    title={An executable specification of asynchronous pi-calculus and may-testing
+        in Maude 2.0},
+    booktitle={International Workshop on Rewriting Logic and its Applications (WRLA'02)},
+    year={2002},
+    publisher={Elsevier Science},
+    volume={71},
+    series={Electronic Notes in Theoretical Computer Science},
+    myconfname={WRLA'02},
+    myconfurl={http://www.di.unipi.it/wrla2002/},
+    ps={papers/picalc-wrla2002.ps},
+    pdf={papers/picalc-wrla2002.pdf},
+}
+
+@inbook{SAipc02,
+    author={Koushik Sen and Gul Agha},
+    editor={Dan C. Marinescu and Craig Lee},
+    title={Process Coordination and Ubiquitous Computing},
+    publisher={CRC Press},
+    year={2002},
+    month={September},
+    chapter={Thin Middleware for Ubiquitous Computing},
+    pages={201--213},
+    ps={papers/ipc.ps},
+    pdf={papers/ipc.pdf},
+}
+
+
+
+@MISC{STbtech99,
+  author = 	 {Koushik Sen and Vivek Tandon},
+  title = 	 {Properties of {OptL}, \#{L} and {UL} and their relation with {NL} class},
+    booktitle={Bachelor' Project Report},
+  school =  {Indian Institute of Technology, Kanpur},
+  year = 	 {1999},
+  month =        {April},
+  noteextra = {Supervisor: Manindra Agrawal},
+    ps={papers/final.ps},
+    pdf={papers/final.pdf},
+}
+
+&lt;/textarea>
+
+<div id="bibtex_display"></div>
+<div class="bibtex_template" style="display:none;">
     <dt> [
         <span class="if myconfurl">
             <a class="myconfurl"><span class="myconfname"></span></a>
@@ -141,13 +1690,105 @@
     </dd>
 </div>
 
-
 <script type="text/javascript">
-    HPage.initUploader();
+    bibtex_js_draw();
 </script>
 
+</textarea>
+
+<!-- SEPARATOR -->
+<textarea id="faq" class="kms-content" data-type=".wiki" data-creation-time="1433282058268" data-update-time="1433285339481">=== Questions from Prospective Students and Postdocs ===
+
+  * **Graduate and Undergraduate Students:** If you are **not** enrolled at UC Berkeley, please click [[http://www.eecs.berkeley.edu/Gradadm/|here]].  Please note that I usually do **not** take on undergraduate summer interns. If you're interested in my [[http://srl.cs.berkeley.edu/~ksen/sen-stmt.pdf|work]] and you are already at or admitted to Berkeley, please e-mail me or drop by my office to discuss research opportunities. 
+
+  * **Postdocs:** If you are interested in a post doc position in my group, please e-mail me your CV and a description of research interests and experience. 
+ 
+
+=== Questions concerning Consulting ===
+
+  * **Consulting, Startups, Industry Collaboration, or Work as an Expert Witness:** Under construction (contact me directly)
+  </textarea>
+
+
+<!-- SEPARATOR -->
+<textarea id="projects" class="kms-content" data-type=".wiki" data-creation-time="1433282061428" data-update-time="1433284481659">=== Cool Projects ===
+
+==== Current ====
+  * [[https://github.com/SRA-SiliconValley/jalangi|Jalangi]]: A concolic testing, symbolic execution, record-replay, and dynamic analysis framework for JavaScript
+  * [[https://github.com/wtchoi/SwiftHand|SwiftHand]]: An automated GUI testing tool for Android apps.  
+  * [[http://crd.lbl.gov/groups-depts/ftg/projects/current-projects/corvette/|CORVETTE]]: Correctness, Verification, and Testing of Parallel Programs
+  * [[https://github.com/ksen007/janala2|CATG (A new Java Concolic Testing Tool)]], [[http://crest.googlecode.com/|CREST]], [[http://osl.cs.illinois.edu/software/jcute/|jCUTE]], CUTE and DART: Combining concrete and symbolic analysis to test sequential and parallel C and Java programs.  See our PLDI 05, FSE 05, FASE 06, HVC 06, CAV 06, ISSTA 07, ICSE 07, ASE 08 papers.
+
+
+==== Past ==== 
+  * [[http://parlab.eecs.berkeley.edu/|Par Lab]] Parallel Computing Laboratory. [[http://www.nytimes.com/2008/03/19/technology/19compute.html|Press 1]] [[http://www.webwire.com/ViewPressRel.asp?aId=61492|Press 2]] [[http://www.bizjournals.com/wichita/stories/2008/03/17/daily26.html|Press 3]] [[http://news.moneycentral.msn.com/ticker/article.aspx?Feed=ACBJ&Date=20080318&ID=8359659&Symbol=MSFT|Press 4]]
+  * [[http://srl.cs.berkeley.edu/~ksen/calfuzzer/|CalFuzzer]]: An active random testing tool for multi-threaded Java.  See our ASE 07, PLDI 08, FSE 08, PLDI 09, CAV 09, FSE 09, FSE 10, ISSTA 11, SC'11, ICS'13 papers.
+  * [[http://www.cs.berkeley.edu/~joel/codehint/|CodeHint]]: CodeHint is a smart auto-completion and code synthesis tool.
+  * [[http://osl.cs.uiuc.edu/~ksen/eagle/|Eagle]], [[http://osl.cs.uiuc.edu/~ksen/jmpax/web/|JMPaX]], and [[http://fsl.cs.uiuc.edu/diana/|DIANA]]: Runtime Monitoring Techniques and Tools for Sequential, Concurrent, and Distributed Systems.
+  * [[http://osl.cs.uiuc.edu/~ksen/vesta2/|VESTA]]: Statistical and Probabilistic Model Checker and Analyzer for Probabilistic Systems.
+  * [[http://osl.cs.uiuc.edu/~vardhan/lever.html|LEVER]]: Learning to Verify --- Application of machine learning to automatically verify infinite state systems.
+  </textarea>
+
+
+<!-- SEPARATOR -->
+<textarea id="about2" class="kms-content" data-type=".md" data-creation-time="1433284221564" data-update-time="1433284229922">### Research Interests
+Software Engineering, Formal Methods, and Programming Languages (with an emphasis on Software Reliability): Dynamic Program Analysis, Software Testing, Debugging, Verification,  Model-Checking, Runtime Monitoring, Performance Evaluation, and Computational Logic. 
+
+### Biography
+Koushik Sen is an associate professor in the Department of Electrical Engineering and Computer Sciences at the University of California, Berkeley. His research interest lies in Software Engineering, Programming Languages, and Formal methods. He is interested in developing software tools and methodologies that improve programmer productivity and software quality. He is best known for his work on “DART: Directed Automated Random Testing” and concolic testing. He has received a NSF CAREER Award in 2008, a Haifa Verification Conference (HVC) Award in 2009, a IFIP TC2 Manfred Paul Award for Excellence in Software: Theory and Practice in 2010, a Sloan Foundation Fellowship in 2011, and a Professor R. Narasimhan Lecture Award in 2014. He has won several ACM SIGSOFT Distinguished Paper Awards. He received the C.L. and Jane W-S. Liu Award in 2004, the C. W. Gear Outstanding Graduate Award in 2005, and the David J. Kuck Outstanding Ph.D. Thesis Award in 2007, and a Distinguished Alumni Educator Award in 2014 from the UIUC Department of Computer Science. He holds a B.Tech from Indian Institute of Technology, Kanpur, and M.S. and Ph.D. in CS from University of Illinois at Urbana-Champaign.
+
+### Concolic Testing Homework
+[CUTE Homework for Java](http://fa11.pbworks.com/w/page/45241717/CUTE%20Homework), [CUTE Homework for C](http://sp09.pbwiki.com/CUTE-Homework)
+
+### Active Testing Homework
+[RaceFuzzer Homework](http://sp09.pbwiki.com/RaceFuzzer-Homework)
+
+</textarea>
+
+<!-- SEPARATOR -->
+<textarea id="students" class="kms-content" data-type=".wiki" data-creation-time="1433284276918" data-update-time="1433284354546">=== Students ===
+
+==== Current Students ====
+  * [[http://www.eecs.berkeley.edu/~wtchoi/|Philip Wontae Choi]]
+  * Rafael Dutra
+  * Liang Gong
+  * Benjamin Mehne
+
+====  Former Students ====
+
+PhD
+  * [[http://www.eecs.berkeley.edu/~joel/|Joel Galenson]] (co-advised by Ras Bodik) [Qualcomm Research]
+  * [[http://www.cs.berkeley.edu/~parkcs/|Chang-Seo Park]] (PhD) [Google]
+  * [[http://www.eecs.berkeley.edu/~jburnim/ |Jacob Burnim]] (PhD) [Startup, Sift Science]
+  * [[http://www.cs.berkeley.edu/~pallavi/|Pallavi Joshi]] (PhD) [NEC Labs America]
+  * Christos Stergiou [Post Doc at UPenn]
+
+MS
+  * Cuong Nguyen (MS) [Facebook.com]
+  * [[http://www.eecs.berkeley.edu/~jalbert/|Nicholas Jalbert]] (MS) [Startup, Captricity]
+  * [[http://www.sudeep-juvekar.com/|Sudeep Juvekar]] (MS)
+  * Yamini Kannan (MS)
+  * [[http://www.depoll.com/|David Eitan Poll]] (MS) [Microsoft]
+  * [[http://www.shlim.net/|Mark Shlimovich]] (MS) [Microsoft]
+
+
+
+
+
+== Post Docs ==
+==== Current postdocs ====
+  * [[http://www.eecs.berkeley.edu/~xuehaiq/|Xuehai Qian]]
+
+==== Former postdocs ====
+  * [[http://www.eecs.berkeley.edu/~rubio/|Cindy Rubio-González]] (jointly with James Demmel and Costin Iancu) [Now at UC Davis]
+  * [[http://mp.binaervarianz.de|Michael Pradel]] [Now at TU Darmstadt]
+  * Tayfun Elmas (jointly with George Necula) [Now at Google]
+  * [[http://perso.univ-perp.fr/guillaume.revy/index.php?page=home|Guillaume Revy]] (jointly with James Demmel) [Now at Université de Perpignan Via Domitia]
+  </textarea>
+
+<!-- SEPARATOR -->
+<textarea id="note" class="kms-content" data-type=".enc.txt" data-creation-time="1433285521033" data-update-time="1433285539064">U2FsdGVkX19mEtZRx/XI2K05eTbuWXxVjSiKkKouFvSzaT+DnOwKqtkx2Cxu7w1JUB6Jwbjcymjl2sH25mUKU5wp0y0JNE2VqoaUzl208VGKoPDXOmZ4kqiBm2RZ8Lwk6ygiNaeWMlLvsnBjHudt7VS946hWR3FWp29wHHYEzWbOaJD2lP1ZiXQvHIkolIJoIHL3GisduULdYfHP2sG+UxbMtyas4S/aYa1ZyTlbjqWfCZbp4mpAWfceMrI4vPnMhn0H+m85PUzVAP3ZEWqiSJP/5c2YGlLzKR3jaVhx4kWehyWwg1C8Zyh/ksZ+7TXnoBUNeGfSNLr4qXgQY4Hb+fuSfOrnvs6zEzy+yL/GH8/LwLO84IVENW8LJOnv73gzqODOSMIYWmtSPW9b1p/u4Mfw1VHlXMcXmXEbbzxfGxXqKEb231UEnpcOZVCsy4mHcL3CdLKzxinqKebgF9Bv/0u9x+uBgXOjy2d4TDgT2dgySSHTJ5kX+VsnQk+DgHYnrfNY3EQZR4Rls3tnsz+UlzpZLo1KpbjRJkBApTcxKebgQkwt05NSRO77SkfWP8Vank/rKm6yOjgY+AMylXK9zIKjIn7pBK2TyMHIbvy0jUhex7ExZUI8twLaKKKGGlhBk2B003Dmge6WKg81fjFIH7o6CLtTNlHTMg7psjvhIlzNUD4aXxyUP++5kq5y9MK3XZ15VRKt5WdyYAXMOnoTWJ73bLsCF+GDnmelW0G7Cji26QDCZV5eHd/SCK/SzWg+/18g0BYreAXj22ddoMbj8WNEGoSzX4KQMmt6YYgQAkPCBjOCKxTYXHrEkL5fz1lhZ1hfVdwAeGTl4coohKYDf9fOu2C8qt9OtMAJ907J2LGQDRv34a30eyCReRP8l+VPA7hWN340u/lMoACNwFnBAVtz1SrrcKBWDTxbPJQQxe0wyeAn6Uc+jfemVa/GyhgaCgCRY1qQU71y/R1EUgN9litrEa1uP2jtYVDFuuAbx/CYF4GBLT5lb8nhjMzZS5TEFlM1bcTQVNdmWqVbg6324if08STU3d4X84O1nrBwakFK9zDFGHhEb5YmPN8z+Pb2GDZXENOG5e2zbWkjwbd4vvAUN6hP9vS0k3NzhDsS23TCh3DgYoSmvCZYb8LjTdnB</textarea>
+
+<!-- SEPARATOR -->
 </body>
 </html>
-
-
-
