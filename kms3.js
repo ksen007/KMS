@@ -672,5 +672,6 @@ var KMS = {};
     module.Content = Content;
     module.setPlugin = setPlugin;
     module.getPlugin = getPlugin;
+    module.URL = "https://apps.eecs.berkeley.edu/~ksen/readwrite.php";
 
 }(KMS));
