@@ -290,6 +290,7 @@ var KMS = {};
     };
 
     Content.deleteContent = function (id) {
+        modified = true;
         delete contents[id];
     };
 
@@ -309,6 +310,7 @@ var KMS = {};
             $("div[data-content='" + this.id + "']").each(function (i) {
                 refreshContent($(this));
             });
+            modified = true;
             return true;
         }
         return false;
@@ -384,6 +386,7 @@ var KMS = {};
                     console.log(result.message);
                     saveerr(file);
                 } else {
+                    modified = false;
                     console.log("Success");
                     console.log(result['data']);
                     BootstrapDialog.show({
@@ -746,6 +749,11 @@ var KMS = {};
             //    anchorLoadChange();
             //}
             $(window).bind('hashchange', anchorLoadChange).trigger('hashchange');
+            $(window).bind('beforeunload', function(e) {
+                if (modified) {
+                    return "Page modified.  Do you want to leave without saving the page?";
+                }
+            });
         }
     );
 
