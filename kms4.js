@@ -3,6 +3,7 @@ var KMS = {};
 
     var modified = false;
     var contents = {};
+    var isContentsEncrypted = true;
     var KMSMAIN = '#kms-main';
     var pagePrefix;
     var SEPARATOR = "<!-- KMS Contents -->";
@@ -58,7 +59,7 @@ var KMS = {};
         if (hashIndex > 0) {
             href = href = href.substring(0, hashIndex);
         }
-        var key = href = ":" + id;
+        var key = href + ":" + id;
         var currVal = document.getElementById(id).value;
         if (currVal !== undefined && currVal.length > 0) {
             localStorage.setItem(key, CryptoJS.AES.encrypt(currVal, id));
@@ -120,7 +121,7 @@ var KMS = {};
         if (isEnc(type)) {
             if (key.length > 0) {
                 var decrypted = CryptoJS.AES.decrypt(text, key);
-                if (decrypted.sigBytes <= 0) {
+                if (decrypted.sigBytes < 0) {
                     console.log("Decryption failed.");
                     return null;
                 }
@@ -344,8 +345,23 @@ var KMS = {};
         delete contents[id];
     };
 
+    Content.prototype.decrypt = function () {
+        var txt = decrypt(this.text, this.type);
+        if (txt === encString) {
+            return false;
+        } else {
+            this.text = txt;
+            return true;
+        }
+    };
+
     Content.prototype.getText = function () {
-        return decrypt(this.text, this.type);
+        if (isContentsEncrypted && isEnc(this.type)) {
+            return encString;
+        } else {
+            return this.text;
+        }
+        //return decrypt(this.text, this.type);
     };
 
     Content.prototype.getType = function () {
@@ -353,7 +369,7 @@ var KMS = {};
     };
 
     Content.prototype.setText = function (text) {
-        text = encrypt(text, this.type);
+        //text = encrypt(text, this.type);
         if (text !== null) {
             this.text = text;
             this.updateTime = Date.now();
@@ -387,13 +403,18 @@ var KMS = {};
     };
 
     Content.prototype.serialize = function () {
+        var txt = encrypt(this.text, this.type);
+        if (txt === null) {
+            throw "Encryption failed";
+        }
         return '\x3Ctextarea id="' + this.getId() +
             '" class="kms-content" data-type="' + this.getType() +
             '" data-creation-time="' + this.getCreationTime() +
             '" data-update-time="' + this.getUpdateTime() +
             '">' +
-            this.text.replace(/<(\/textarea>)/gi, '&lt;$1') +
+            txt.replace(/<(\/textarea>)/gi, '&lt;$1') +
             '\x3C/textarea>\n\n<!-- SEPARATOR -->\n';
+
     };
 
     /********************************************************************/
@@ -559,12 +580,20 @@ var KMS = {};
         pCounter++;
     }
 
+    function refreshPage() {
+        decryptContents();
+        refreshContent($(KMSMAIN));
+        $(window).trigger('hashchange');
+    }
+
+
     module.savePage = savePage;
     module.savePageAs = savePageAs;
     module.newPage = newPage;
     module.download = download;
     module.listContents = listContentsForDeletion;
     module.incCount = incCount;
+    module.refreshPage = refreshPage;
 
     /********************************************************************/
 
@@ -594,7 +623,7 @@ var KMS = {};
 
             for (k in anchorMap) {
                 if (anchorMap.hasOwnProperty(k)) {
-                    if (currentAnchorMap[k] !== anchorMap[k]) {
+                    //if (currentAnchorMap[k] !== anchorMap[k]) {
                         var idtype = anchorMap[k];
                         var id = idtype.substring(0, idtype.indexOf("."));
                         var type = idtype.substring(idtype.indexOf("."));
@@ -606,7 +635,7 @@ var KMS = {};
                             container[0].setAttribute('data-type', type);
                             refreshContent(container);
                         }
-                    }
+                    //}
                 }
             }
             for (k in currentAnchorMap) {
@@ -810,13 +839,25 @@ var KMS = {};
         );
     }
 
+    function decryptContents() {
+        if (isContentsEncrypted) {
+            for (var divid in contents) {
+                if (contents.hasOwnProperty(divid)) {
+                    var content = contents[divid];
+                    if (!content.decrypt()) {
+                        return false;
+                    }
+                }
+            }
+        }
+        isContentsEncrypted = false;
+        return true;
+    }
+
     /********************************************************************/
 
     $(document).ready(function () {
             console.log("Populating page");
-            initUploader();
-            collectContents();
-            refreshContent($(KMSMAIN));
             //var hash = window.location.hash;
             //if (hash !== '') {
             //    anchorLoadChange();
@@ -849,6 +890,8 @@ var KMS = {};
             '                Drag and Drop Files Here<br/>' +
             '            </div>' +
             '            <div class="col-md-2">' +
+            '                <span onclick="KMS.refreshPage()"' +
+            '                      class="glyphicon glyphicon-refresh"  title="Refresh page"></span>' +
             '                <span onclick="KMS.savePage()"' +
             '                      class="glyphicon glyphicon-floppy-disk" title="Save"></span>' +
             '                <span onclick="KMS.download()"' +
@@ -866,6 +909,12 @@ var KMS = {};
             '        </div>' +
             '    </div>' +
             '</div>');
+
+            initUploader();
+            collectContents();
+            decryptContents();
+            refreshContent($(KMSMAIN));
+
             $(window).bind('hashchange', anchorLoadChange).trigger('hashchange');
             $(window).bind('beforeunload', function (e) {
                 if (modified) {
@@ -883,6 +932,6 @@ var KMS = {};
     module.Content = Content;
     module.setPlugin = setPlugin;
     module.getPlugin = getPlugin;
-    module.URL = "https://apps.eecs.berkeley.edu/~ksen/readwrite2.php";
+    module.URL = "https://apps.eecs.berkeley.edu/~ksen/readwrite.php";
 
 }(KMS));
