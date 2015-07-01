@@ -11,7 +11,6 @@
     <script src="libkms/bootstrap.min.js"></script>
     <script src="libkms/underscore-min.js"></script>
 
-    <script src="kms3.js"></script>
 
     <link rel="stylesheet" href="libkms/bootstrap-dialog.min.css">
     <script src="libkms/bootstrap-dialog.min.js"></script>
@@ -20,21 +19,12 @@
 
     <script src="libkms/showdown.min.js"></script>
     <script src="libkms/creole.js"></script>
+    <script src="kms4.js"></script>
+
     <script src="libkms/bibtex_js.js"></script>
 
     <link rel="stylesheet" href="libkms/codemirror.min.css">
     <link rel="stylesheet" href="libkms/fullscreen.min.css">
-    <script src="libkms/codemirror.min.js"></script>
-    <script src="libkms/css.min.js"></script>
-    <script src="libkms/javascript.min.js"></script>
-    <script src="libkms/xml.min.js"></script>
-    <script src="libkms/htmlembedded.min.js"></script>
-    <script src="libkms/clike.min.js"></script>
-    <script src="libkms/php.min.js"></script>
-    <script src="libkms/markdown.min.js"></script>
-    <script src="libkms/matchbrackets.min.js"></script>
-    <script src="libkms/fullscreen.min.js"></script>
-
     <style type="text/css">
         .CodeMirror {
             border: 1px solid black;
@@ -62,51 +52,6 @@
 <body>
 
 <div id="kms-main" class="kms-location" data-content="kms-body"></div>
-
-<div class="container" style="z-index: 10000;">
-    <a data-toggle="collapse" href="#kms-collapse">
-        <small>+</small></small></span>
-    </a>
-
-    <div class="row">
-        <div id="kms-collapse" class="collapse">
-            <div class="form-group col-md-2">
-                <input type="password" id="kms-key1" class="pull-right form-control input-sm" style="padding: 1em;"
-                       placeholder="Key for encryption ...">
-            </div>
-            <div class="form-group col-md-2">
-                <input type="password" id="kms-key2" class="pull-right form-control input-sm" style="padding: 1em;"
-                       placeholder="Key for encryption ...">
-            </div>
-            <div class="form-group col-md-2">
-                <input type="password" id="kms-password" class="pull-right form-control input-sm"
-                       style="padding: 1em;"
-                       placeholder="Password for editing ...">
-            </div>
-            <div class="form-group col-md-2">
-                <input id="kms-file" class="pull-right form-control input-sm"
-                       style="padding: 1em;"
-                       placeholder="File name ...">
-            </div>
-            <div id="kms-drop-area-div" class="col-md-2">
-                Drag and Drop Files Here<br/>
-            </div>
-            <div class="col-md-2">
-                <span onclick="KMS.savePage()"
-                      class="glyphicon glyphicon-floppy-disk" title="Save"></span>
-                <span onclick="KMS.download()"
-                      class="glyphicon glyphicon-download-alt"  title="Download"></span>
-                <span onclick="KMS.newPage()"
-                      class="glyphicon glyphicon-file"  title="Create new using file name"></span>
-                <span onclick="KMS.savePageAs()"
-                      class="glyphicon glyphicon-cloud-upload"  title="Save as file name"></span>
-                <span onclick="KMS.listContents()"
-                      class="glyphicon glyphicon-list"  title="List contents for removal.  Must save after removal."></span>
-            </div>
-        </div>
-    </div>
-    <div id="kms-main-edit"></div>
-</div>
 
 <!-- KMS Contents -->
 </body>
