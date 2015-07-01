@@ -78,6 +78,26 @@ var KMS = {};
         }
     }
 
+
+    function getNewPass(oldPass) {
+        var newVal1 = document.getElementById("kms-password-new1").value;
+        var newVal2 = document.getElementById("kms-password-new2").value;
+        if (newVal1 !== undefined && newVal1.length > 0) {
+            if (newVal1 === newVal2) {
+                return newVal1;
+            } else {
+                BootstrapDialog.show({
+                    type: BootstrapDialog.TYPE_WARNING,
+                    title: 'Error',
+                    message: 'New passwords are not identical.'
+                });
+                return null;
+            }
+        } else {
+            return oldPass;
+        }
+    }
+
     /********************************************************************/
 
     function isEnc(transformers) {
@@ -443,32 +463,36 @@ var KMS = {};
     }
 
 
-    function savePageAux(file, str) {
-        var data = {file: file, content: str, action: 'write', password: getPass('kms-password')};
+    function savePageAux(file, str, oldFile) {
+        var oldPass = getPass('kms-password');
+        var newPass = getNewPass(oldPass);
+        if (newPass!==null) {
+            var data = {file: file, oldFile: oldFile, content: str, action: 'write', password: oldPass, newPassword: newPass};
 
-        console.log("Saving " + file + " ... ");
-        $.ajax({
-            url: module.URL,
-            type: 'POST',
-            data: data,
-            success: function (result) {
-                result = $.parseJSON(result);
-                if (!result.success) {
-                    console.log(result.message);
+            console.log("Saving " + file + " ... ");
+            $.ajax({
+                url: module.URL,
+                type: 'POST',
+                data: data,
+                success: function (result) {
+                    result = $.parseJSON(result);
+                    if (!result.success) {
+                        console.log(result.message);
+                        saveerr(file);
+                    } else {
+                        modified = false;
+                        console.log("Success");
+                        console.log(result['data']);
+                        BootstrapDialog.show({
+                            message: 'Successfully saved ' + data.file
+                        });
+                    }
+                },
+                error: function () {
                     saveerr(file);
-                } else {
-                    modified = false;
-                    console.log("Success");
-                    console.log(result['data']);
-                    BootstrapDialog.show({
-                        message: 'Successfully saved ' + data.file
-                    });
                 }
-            },
-            error: function () {
-                saveerr(file);
-            }
-        })
+            });
+        }
 
     }
 
@@ -507,7 +531,7 @@ var KMS = {};
         var file = getCurrentFileName();
         var econtent;
         econtent = serializePage();
-        savePageAux(file, econtent);
+        savePageAux(file, econtent, file);
     }
 
 
@@ -531,14 +555,16 @@ var KMS = {};
         var ret = pagePrefix;
         ret = ret + SEPARATOR + "\n";
         ret = ret + '</body>\n</html>\n';
-        savePageAux($('#kms-file').val(), ret);
+        var file = getCurrentFileName();
+        savePageAux($('#kms-file').val(), ret, file);
     }
 
 
     function savePageAs2() {
         var econtent;
         econtent = serializePage();
-        savePageAux($('#kms-file').val(), econtent);
+        var file = getCurrentFileName();
+        savePageAux($('#kms-file').val(), econtent, file);
     }
 
 
@@ -868,20 +894,30 @@ var KMS = {};
             '    </a>' +
             '    <div class="row">' +
             '        <div id="kms-collapse" class="collapse">' +
-            '            <div class="form-group col-md-2">' +
+            '            <div class="form-group col-md-1">' +
             '                <input type="password" id="kms-key1" class="pull-right form-control input-sm" style="padding: 1em;"' +
             '                       placeholder="Key for encryption ...">' +
             '            </div>' +
-            '            <div class="form-group col-md-2">' +
+            '            <div class="form-group col-md-1">' +
             '                <input type="password" id="kms-key2" class="pull-right form-control input-sm" style="padding: 1em;"' +
             '                       placeholder="Key for encryption ...">' +
             '            </div>' +
-            '            <div class="form-group col-md-2">' +
+            '            <div class="form-group col-md-1">' +
             '                <input type="password" id="kms-password" class="pull-right form-control input-sm"' +
             '                       style="padding: 1em;"' +
             '                       placeholder="Password for editing ...">' +
             '            </div>' +
-            '            <div class="form-group col-md-2">' +
+            '            <div class="form-group col-md-1">' +
+            '                <input type="password" id="kms-password-new1" class="pull-right form-control input-sm"' +
+            '                       style="padding: 1em;"' +
+            '                       placeholder="New password for editing ...">' +
+            '            </div>' +
+            '            <div class="form-group col-md-1">' +
+            '                <input type="password" id="kms-password-new2" class="pull-right form-control input-sm"' +
+            '                       style="padding: 1em;"' +
+            '                       placeholder="New password for editing ...">' +
+            '            </div>' +
+            '            <div class="form-group col-md-1">' +
             '                <input id="kms-file" class="pull-right form-control input-sm"' +
             '                       style="padding: 1em;"' +
             '                       placeholder="File name ...">' +
@@ -932,6 +968,6 @@ var KMS = {};
     module.Content = Content;
     module.setPlugin = setPlugin;
     module.getPlugin = getPlugin;
-    module.URL = "https://apps.eecs.berkeley.edu/~ksen/readwrite.php";
+    module.URL = "https://apps.eecs.berkeley.edu/~ksen/readwrite2.php";
 
 }(KMS));

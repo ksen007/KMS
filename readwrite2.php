@@ -59,13 +59,13 @@ if (array_key_exists('action',$_POST) && $_POST['action'] == 'read' ){
     $message = 'File not found: '.$_POST['file'];
   }
 } else if (array_key_exists('action',$_POST) && $_POST['action'] == 'write') {
-  if(array_key_exists('password',$_POST) && crypt($_POST['password'],$salt) == $cpassword) {
+  if(array_key_exists('password',$_POST) && array_key_exists('oldFile',$_POST) && array_key_exists('newPassword',$_POST) && matchPassword($_POST['oldFile'], $_POST['password'])) {
     if (array_key_exists('file', $_POST) && array_key_exists('content',$_POST)) {
       $file = $_POST['file'];
       if (!file_exists(dirname($file))){
 	$success = mkdir(dirname($file), 0700, TRUE);
       }
-      $success = file_put_contents($file, $_POST['content']);
+      $success = file_put_contents($file, $_POST['content']."<!--PASSWORD(".password_hash($_POST['newPassword'],PASSWORD_DEFAULT).")-->");
       if ($success) {
 	$content = '';
 	$success = TRUE;
