@@ -62,12 +62,13 @@ var KMS = {};
         var key = href + ":" + id;
         var currVal = document.getElementById(id).value;
         if (currVal !== undefined && currVal.length > 0) {
+            id = id + "2";
             localStorage.setItem(key, CryptoJS.AES.encrypt(currVal, id));
             return currVal;
         } else {
             var oldVal = localStorage.getItem(key);
             if (oldVal && pCounter === 2) {
-                var pass = CryptoJS.AES.decrypt(oldVal, id);
+                var pass = CryptoJS.AES.decrypt(oldVal, id+(pCounter));
                 if (pass.sigBytes > 0) {
                     var clearPass = pass.toString(CryptoJS.enc.Utf8);
                     document.getElementById(id).value = clearPass;
@@ -423,7 +424,12 @@ var KMS = {};
     };
 
     Content.prototype.serialize = function () {
-        var txt = encrypt(this.text, this.type);
+        var text;
+        if (isContentsEncrypted) {
+            txt = this.text;
+        } else {
+            txt = encrypt(this.text, this.type);
+        }
         if (txt === null) {
             throw "Encryption failed";
         }
@@ -894,30 +900,30 @@ var KMS = {};
             '    </a>' +
             '    <div class="row">' +
             '        <div id="kms-collapse" class="collapse">' +
-            '            <div class="form-group col-md-1">' +
+            '            <div class="form-group col-md-2">' +
             '                <input type="password" id="kms-key1" class="pull-right form-control input-sm" style="padding: 1em;"' +
             '                       placeholder="Key for encryption ...">' +
             '            </div>' +
-            '            <div class="form-group col-md-1">' +
+            '            <div class="form-group col-md-2">' +
             '                <input type="password" id="kms-key2" class="pull-right form-control input-sm" style="padding: 1em;"' +
             '                       placeholder="Key for encryption ...">' +
             '            </div>' +
-            '            <div class="form-group col-md-1">' +
+            '            <div class="form-group col-md-2">' +
             '                <input type="password" id="kms-password" class="pull-right form-control input-sm"' +
             '                       style="padding: 1em;"' +
             '                       placeholder="Password for editing ...">' +
             '            </div>' +
-            '            <div class="form-group col-md-1">' +
+            '            <div class="form-group col-md-2">' +
             '                <input type="password" id="kms-password-new1" class="pull-right form-control input-sm"' +
             '                       style="padding: 1em;"' +
             '                       placeholder="New password for editing ...">' +
             '            </div>' +
-            '            <div class="form-group col-md-1">' +
+            '            <div class="form-group col-md-2">' +
             '                <input type="password" id="kms-password-new2" class="pull-right form-control input-sm"' +
             '                       style="padding: 1em;"' +
             '                       placeholder="New password for editing ...">' +
             '            </div>' +
-            '            <div class="form-group col-md-1">' +
+            '            <div class="form-group col-md-2">' +
             '                <input id="kms-file" class="pull-right form-control input-sm"' +
             '                       style="padding: 1em;"' +
             '                       placeholder="File name ...">' +

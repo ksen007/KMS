@@ -59,39 +59,41 @@ if (array_key_exists('action',$_POST) && $_POST['action'] == 'read' ){
     $message = 'File not found: '.$_POST['file'];
   }
 } else if (array_key_exists('action',$_POST) && $_POST['action'] == 'write') {
-  if(array_key_exists('password',$_POST) && array_key_exists('oldFile',$_POST) && array_key_exists('newPassword',$_POST) && matchPassword($_POST['oldFile'], $_POST['password'])) {
-    if (array_key_exists('file', $_POST) && array_key_exists('content',$_POST)) {
-      $file = $_POST['file'];
-      if (!file_exists(dirname($file))){
-	$success = mkdir(dirname($file), 0700, TRUE);
-      }
-      $success = file_put_contents($file, $_POST['content']."<!--PASSWORD(".password_hash($_POST['newPassword'],PASSWORD_DEFAULT).")-->");
-      if ($success) {
-	$content = '';
-	$success = TRUE;
-	$message = 'File modified: '.$_POST['file'];
-      } else {
-	$content = FALSE;
-	$success = FALSE;
-	$message = 'Cannot modify file: '.$_POST['file'];
-      }
+  if(array_key_exists('password',$_POST) && array_key_exists('oldFile',$_POST) && array_key_exists('newPassword',$_POST) && array_key_exists('file', $_POST)){
+    $file = $_POST['file'];
+    if ((!file_exists($file) && matchPassword($_POST['oldFile'], $_POST['password'])) || (file_exists($file) && matchPassword($file, $_POST['password']))) {
+     if (array_key_exists('content',$_POST)) {
+       if (!file_exists(dirname($file))){
+	 $success = mkdir(dirname($file), 0700, TRUE);
+       }
+       $success = file_put_contents($file, $_POST['content']."<!--PASSWORD(".password_hash($_POST['newPassword'],PASSWORD_DEFAULT).")-->");
+       if ($success) {
+	 $content = '';
+	 $success = TRUE;
+	 $message = 'File modified: '.$_POST['file'];
+       } else {
+	 $content = FALSE;
+	 $success = FALSE;
+	 $message = 'Cannot modify file: '.$_POST['file'];
+       }
+     } else {
+       $content = FALSE;
+       $success = FALSE;
+	 $message = 'content field missing in request.';
+     }
+   } else {
+    $content = FALSE;
+    $success = FALSE;
+    if (file_exists($file)) {
+      $message = 'Overwrite failed.  Access denied to file due to wrong password in existing file : '.$_POST['file'];
     } else {
-      $content = FALSE;
-      $success = FALSE;
-      if (array_key_exists('file', $_POST)) {
-	$message = 'file field missing in request.';
-      } else {
-	$message = 'content field missing in request.';
-      }
+      $message = 'Access denied to file due to wrong password in old file : '.$_POST['oldFile'];
     }
+   }
   } else {
     $content = FALSE;
     $success = FALSE;
-    if (!array_key_exists('password',$_POST)) {
-      $message = 'Access denied to file due to non-existent password: '.$_POST['file'];
-    } else {
-      $message = 'Access denied to file due to wrong password: '.$_POST['file'];
-    }
+    $message = 'password, newPassword, file, or oldFile field is non-existent: '.$_POST['file'];
   }
 } else if (array_key_exists('action',$_POST) && $_POST['action'] == 'remove') {
   if (array_key_exists('password',$_POST) && crypt($_POST['password'],$salt) == $cpassword) {
