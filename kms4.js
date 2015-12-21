@@ -424,7 +424,7 @@ var KMS = {};
     };
 
     Content.prototype.serialize = function () {
-        var text;
+        var txt;
         if (isContentsEncrypted) {
             txt = this.text;
         } else {
