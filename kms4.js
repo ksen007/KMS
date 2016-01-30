@@ -51,7 +51,7 @@ var KMS = {};
     }
 
     /********************************************************************/
-    var pCounter = 0;
+    var pCounter = 2;
 
     function getPass(id) {
         var href = window.location.href;
@@ -355,8 +355,6 @@ var KMS = {};
         if (!content) {
             type = type || ".html";
             contents[id] = content = new Content(id, "", Content.defaultTransformer, type, Date.now(), Date.now());
-        } else {
-            content.type = type || content.type;
         }
         return content;
     };
@@ -608,10 +606,6 @@ var KMS = {};
         }
     }
 
-    function incCount() {
-        pCounter++;
-    }
-
     function refreshPage() {
         decryptContents();
         refreshContent($(KMSMAIN));
@@ -624,7 +618,6 @@ var KMS = {};
     module.newPage = newPage;
     module.download = download;
     module.listContents = listContentsForDeletion;
-    module.incCount = incCount;
     module.refreshPage = refreshPage;
 
     /********************************************************************/
@@ -944,9 +937,6 @@ var KMS = {};
             '                      class="glyphicon glyphicon-cloud-upload"  title="Save as file name"></span>' +
             '                <span onclick="KMS.listContents()"' +
             '                      class="glyphicon glyphicon-list"  title="List contents for removal.  Must save after removal."></span>' +
-            '                <span onclick="KMS.incCount()"' +
-            '                      class="glyphicon glyphicon-flash"  title="Increment"></span>' +
-            '' +
             '            </div>' +
             '        </div>' +
             '    </div>' +
