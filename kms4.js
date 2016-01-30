@@ -888,62 +888,77 @@ var KMS = {};
             //    anchorLoadChange();
             //}
             $('body').append('<div class="container" style="z-index: 10000;">' +
-            '    <a data-toggle="collapse" href="#kms-collapse">' +
-            '        <small>+</small>' +
-            '    </a>' +
-            '    <div class="row">' +
-            '        <div id="kms-collapse" class="collapse">' +
-            '            <div class="form-group col-md-2">' +
-            '                <input type="password" id="kms-key1" class="pull-right form-control input-sm" style="padding: 1em;"' +
-            '                       placeholder="Key for encryption ...">' +
-            '            </div>' +
-            '            <div class="form-group col-md-2">' +
-            '                <input type="password" id="kms-key2" class="pull-right form-control input-sm" style="padding: 1em;"' +
-            '                       placeholder="Key for encryption ...">' +
-            '            </div>' +
-            '            <div class="form-group col-md-2">' +
-            '                <input type="password" id="kms-password" class="pull-right form-control input-sm"' +
-            '                       style="padding: 1em;"' +
-            '                       placeholder="Password for editing ...">' +
-            '            </div>' +
-            '            <div class="form-group col-md-2">' +
-            '                <input type="password" id="kms-password-new1" class="pull-right form-control input-sm"' +
-            '                       style="padding: 1em;"' +
-            '                       placeholder="New password for editing ...">' +
-            '            </div>' +
-            '            <div class="form-group col-md-2">' +
-            '                <input type="password" id="kms-password-new2" class="pull-right form-control input-sm"' +
-            '                       style="padding: 1em;"' +
-            '                       placeholder="New password for editing ...">' +
-            '            </div>' +
-            '            <div class="form-group col-md-2">' +
-            '                <input id="kms-file" class="pull-right form-control input-sm"' +
-            '                       style="padding: 1em;"' +
-            '                       placeholder="File name ...">' +
-            '            </div>' +
-            '            <div id="kms-drop-area-div" class="col-md-2">' +
-            '                Drag and Drop Files Here<br/>' +
-            '            </div>' +
-            '            <div class="col-md-2">' +
-            '                <span onclick="KMS.refreshPage()"' +
-            '                      class="glyphicon glyphicon-refresh"  title="Refresh page"></span>' +
-            '                <span onclick="KMS.savePage()"' +
-            '                      class="glyphicon glyphicon-floppy-disk" title="Save"></span>' +
-            '                <span onclick="KMS.download()"' +
-            '                      class="glyphicon glyphicon-download-alt"  title="Download"></span>' +
-            '                <span onclick="KMS.newPage()"' +
-            '                      class="glyphicon glyphicon-file"  title="Create new using file name"></span>' +
-            '                <span onclick="KMS.savePageAs()"' +
-            '                      class="glyphicon glyphicon-cloud-upload"  title="Save as file name"></span>' +
-            '                <span onclick="KMS.listContents()"' +
-            '                      class="glyphicon glyphicon-list"  title="List contents for removal.  Must save after removal."></span>' +
-            '            </div>' +
-            '        </div>' +
-            '    </div>' +
+            '	<a data-toggle="collapse" href="#kms-collapse">        ' +
+            '		 <span class="glyphicon glyphicon-cog"></span>    ' +
+            '	</a>    ' +
+            '	<div class="row">        ' +
+            '		<div id="kms-collapse" class="collapse">            ' +
+            '           <legend>KMS Control Center</legend>' +
+            '			<form class="form-horizontal">' +
+            '	            <fieldset>' +
+            '	                <div class="form-group">' +
+            '						<label class="col-md-4 control-label" for="kms-key1">Encryption/Decryption Key</label>' +
+            '						<div class="col-md-6">                ' +
+            '							<input type="password" id="kms-key1" class="pull-right form-control input-sm" style="padding: 1em;" placeholder="Key for encryption/decryption ...">            ' +
+            '						</div>' +
+            '					</div>' +
+            '	                <div class="form-group">' +
+            '						<label class="col-md-4 control-label" for="kms-key2">Re-enter Encryption Key</label>' +
+            '						<div class="col-md-6">                ' +
+            '							<input type="password" id="kms-key2" class="pull-right form-control input-sm" style="padding: 1em;" placeholder="Re-enter Key for encryption ...">            ' +
+            '						</div>' +
+            '					</div>' +
+            '	                <div class="form-group">' +
+            '						<label class="col-md-4 control-label" for="kms-password">Password for Remote Server</label>' +
+            '						<div class="col-md-6">                ' +
+            '							<input type="password" id="kms-password" class="pull-right form-control input-sm" style="padding: 1em;" placeholder="Password for Remote Server ...">            ' +
+            '						</div>' +
+            '					</div>' +
+            '	                <div class="form-group">' +
+            '						<label class="col-md-4 control-label" for="kms-password-new1">New Password for Remote Server</label>' +
+            '						<div class="col-md-6">                ' +
+            '							<input type="password" id="kms-password-new1" class="pull-right form-control input-sm" style="padding: 1em;" placeholder="New Password for Remote Server ...">            ' +
+            '						</div>' +
+            '					</div>' +
+            '	                <div class="form-group">' +
+            '						<label class="col-md-4 control-label" for="kms-password-new2">Re-enter New Password for Remote Server</label>' +
+            '						<div class="col-md-6">                ' +
+            '							<input type="password" id="kms-password-new2" class="pull-right form-control input-sm" style="padding: 1em;" placeholder="Re-enter New Password for Remote Server ...">            ' +
+            '						</div>' +
+            '					</div>' +
+            '	                <div class="form-group">' +
+            '						<label class="col-md-4 control-label" for="kms-file">Remote File Name</label>' +
+            '						<div class="col-md-6">                ' +
+            '							<input type="password" id="kms-file" class="pull-right form-control input-sm" style="padding: 1em;" placeholder="Remote File Name ...">            ' +
+            '						</div>' +
+            '					</div>' +
+            '	                <div class="form-group">' +
+            '						<label class="col-md-4 control-label" for="kms-drop-area-div">File Upload Area</label>' +
+            '						<div id="kms-drop-area-div" class="col-md-6" style="border-style: dashed; height: 3em; padding: 0.6em;">' +
+            '							Drag and Drop Files Here<br>            ' +
+            '						</div>            ' +
+            '					</div>' +
+            '					<div class="form-group">' +
+            '						<label class="col-md-4 control-label"></label>' +
+            '	                    <div class="col-md-8">' +
+            '							<button onclick="KMS.refreshPage()" class="btn btn-primary" title="Refresh page">Refresh</button>                ' +
+            '							<button onclick="KMS.savePage()" class="btn btn-primary" title="Save">Save</button>                ' +
+            '							<button onclick="KMS.download()" class="btn btn-primary" title="Download">Download</button>                ' +
+            '							<button onclick="KMS.newPage()" class="btn btn-primary" title="Create new using file name">New</button>                ' +
+            '							<button onclick="KMS.savePageAs()" class="btn btn-primary" title="Save as file name">Save as</button>                ' +
+            '							<button onclick="KMS.listContents()" class="btn btn-primary" title="List contents for removal.  Must save after removal.">List Contents</button>            ' +
+            '                    	</div>' +
+            '	                </div>' +
+            '				</fieldset>' +
+            '			</form>' +
+            '		</div>    ' +
+            '	</div>' +
             '</div>');
-
             initUploader();
             collectContents();
+            getPass('kms-key1');
+            getPass('kms-key2');
+            getPass('kms-password');
             decryptContents();
             refreshContent($(KMSMAIN));
 
