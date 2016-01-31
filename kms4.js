@@ -341,10 +341,10 @@ var KMS = {};
 
     Content.defaultTransformer = function (text) {
         var prefix =
-            '<span class="glyphicon glyphicon-remove-circle pull-right" style="padding: 2px; display: none;" title="Cancel edit"  onclick="KMS.cancelAction(this,{{THISCONTENT}})"></span>' +
-            '<span class="glyphicon glyphicon-check pull-right" style="padding: 2px; display: none;" title="Save"  onclick="KMS.saveAction(this,{{THISCONTENT}})"></span>' +
-            '<span class="glyphicon glyphicon-edit pull-right" style="padding: 2px;" title="Edit" onclick="KMS.editAction(this,{{THISCONTENT}})"></span>' +
-            '<textarea style="display: none"></textarea>' +
+            '<span class="glyphicon glyphicon-remove-circle pull-right" style="z-index: 10000; padding: 2px; display: none;" title="Cancel edit"  onclick="KMS.cancelAction(this,{{THISCONTENT}})"></span>' +
+            '<span class="glyphicon glyphicon-check pull-right" style="z-index: 10000; padding: 2px; display: none;" title="Save"  onclick="KMS.saveAction(this,{{THISCONTENT}})"></span>' +
+            '<span class="glyphicon glyphicon-edit pull-right" style="z-index: 10000; padding: 2px;" title="Edit" onclick="KMS.editAction(this,{{THISCONTENT}})"></span>' +
+            '<textarea style="z-index: 10000; display: none"></textarea>' +
             '<div>';
         var suffix = '</div>';
         return prefix + text + suffix;
@@ -710,7 +710,7 @@ var KMS = {};
             var kvs = hash.split('&');
             for (var i = 0; i < kvs.length; i++) {
                 var kv = kvs[i].split('=');
-                anchorMap[kv[0]] = kv[1];
+                anchorMap[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1]);
             }
 
             for (k in anchorMap) {
