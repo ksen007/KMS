@@ -1,6 +1,6 @@
 #!/usr/bin/php-cgi
 
-   <?php
+<?php
 
 header('Access-Control-Allow-Origin: *');
 header('Cache-Control: no-cache, must-revalidate');
@@ -96,51 +96,57 @@ if (array_key_exists('action',$_POST) && $_POST['action'] == 'read' ){
     $message = 'password, newPassword, file, or oldFile field is non-existent: '.$_POST['file'];
   }
 } else if (array_key_exists('action',$_POST) && $_POST['action'] == 'remove') {
-  if (array_key_exists('password',$_POST) && crypt($_POST['password'],$salt) == $cpassword) {
-    if (array_key_exists('file', $_POST)) {
-      $resp = unlink($_POST['file']);
+  if (array_key_exists('password',$_POST) && array_key_exists('oldFile',$_POST)) {
+    if (matchPassword($_POST['oldFile'], $_POST['password'])) {
+      $resp = unlink($_POST['oldFile']);
       if ($resp) {
-	$content = '';
-	$success = TRUE;
-	$message = 'Deleted file: '.$_POST['file'];
+	    $content = '';
+	    $success = TRUE;
+	    $message = 'Deleted file: '.$_POST['oldFile'];
       } else {
-	$content = FALSE;
-	$success = FALSE;
-	$message = 'Failed to delete file: '.$_POST['file'];
+	    $content = FALSE;
+	    $success = FALSE;
+	    $message = 'Failed to delete file: '.$_POST['oldFile'];
       }
     } else {
       $content = FALSE;
       $success = FALSE;
-      $message = 'file field missing in request.';
+      $message = 'File upload failed due to wrong password in the file :'.$_POST['oldFile'];
     }
   } else {
     $content = FALSE;
     $success = FALSE;
     if (!array_key_exists('password',$_POST)) {
-      $message = 'File deletion failed due to non-existent password: '.$_POST['file'];
+      $message = 'File deletion failed due to non-existent password: '.$_POST['oldFile'];
     } else {
-      $message = 'File deletion failed due to wrong password: '.$_POST['file'];
+      $message = 'File deletion failed because oldFile field is missing: '.$_POST['oldFile'];
     }
   }
 } else if (array_key_exists('action',$_POST) && $_POST['action'] == 'upload') {
-  if (array_key_exists('password',$_POST) && crypt($_POST['password'],$salt) == $cpassword) {
-    if (array_key_exists('directory',$_POST) && $_POST['directory'] != ''){
-      $target = $_POST['directory'];
-    } else {
-      $target = ".";
-    }
-    if (!file_exists($target)){
-      mkdir($target, 0700, TRUE);
-    }
-    $target = $target .'/'. basename( $_FILES['uploaded']['name']) ;
-    if(move_uploaded_file($_FILES['uploaded']['tmp_name'], $target))  {
-      $content = '';
-      $success = TRUE;
-      $message = 'Uploaded file: '.$_FILES['uploaded']['name'];
+  if (array_key_exists('password',$_POST) && array_key_exists('oldFile',$_POST)) {
+    if (matchPassword($_POST['oldFile'], $_POST['password'])) {
+      if (array_key_exists('directory',$_POST) && $_POST['directory'] != ''){
+        $target = $_POST['directory'];
+      } else {
+        $target = ".";
+      }
+      if (!file_exists($target)){
+        mkdir($target, 0700, TRUE);
+      }
+      $target = $target .'/'. basename( $_FILES['uploaded']['name']) ;
+      if(move_uploaded_file($_FILES['uploaded']['tmp_name'], $target))  {
+        $content = '';
+        $success = TRUE;
+        $message = 'Uploaded file: '.$_FILES['uploaded']['name'];
+      } else {
+        $content = FALSE;
+        $success = FALSE;
+        $message = 'Failed to upload file: '.$_FILES['uploaded']['name'];
+      }
     } else {
       $content = FALSE;
       $success = FALSE;
-      $message = 'Failed to upload file: '.$_FILES['uploaded']['name'];
+      $message = 'File upload failed due to wrong password in the old file : '.$_POST['oldFile'];
     }
   } else {
     $content = FALSE;
@@ -148,7 +154,7 @@ if (array_key_exists('action',$_POST) && $_POST['action'] == 'read' ){
     if (!array_key_exists('password',$_POST)) {
       $message = 'File upload failed due to non-existent password: '.$_FILES['uploaded']['name'];
     } else {
-      $message = 'File upload failed due to wrong password: '.$_FILES['uploaded']['name'];
+      $message = 'File upload failed because oldFile field is missing: '.$_FILES['uploaded']['name'];
     }
   }
 } else {

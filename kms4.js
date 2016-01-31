@@ -68,7 +68,7 @@ var KMS = {};
         } else {
             var oldVal = localStorage.getItem(key);
             if (oldVal && pCounter === 2) {
-                var pass = CryptoJS.AES.decrypt(oldVal, id+(pCounter));
+                var pass = CryptoJS.AES.decrypt(oldVal, id + (pCounter));
                 if (pass.sigBytes > 0) {
                     var clearPass = pass.toString(CryptoJS.enc.Utf8);
                     document.getElementById(id).value = clearPass;
@@ -457,21 +457,59 @@ var KMS = {};
         return ret;
     }
 
-    function saveerr(file) {
+    function saveerr(file, message) {
         BootstrapDialog.show({
             type: BootstrapDialog.TYPE_WARNING,
             title: 'Error',
-            message: 'Cannot save ' + file
+            message: 'Cannot save ' + file+". "+message
         });
         console.log("Error");
     }
 
 
+    function sendRemoveRequest() {
+        var oldPass = getPass('kms-password');
+        var file = getCurrentFileName();
+        var data = {oldFile: file, action: 'remove', password: oldPass};
+
+        console.log("Deleting " + file + " ... ");
+        $.ajax({
+            url: module.URL,
+            type: 'POST',
+            data: data,
+            success: function (result) {
+                result = $.parseJSON(result);
+                if (!result.success) {
+                    console.log(result.message);
+                    saveerr(file, result.message);
+                } else {
+                    modified = false;
+                    console.log("Success");
+                    console.log(result['data']);
+                    BootstrapDialog.show({
+                        message: 'Successfully deleted ' + data.oldFile
+                    });
+                }
+            },
+            error: function () {
+                saveerr(file, "Ajax call failed "+JSON.stringify(data));
+            }
+        });
+
+    }
+
     function savePageAux(file, str, oldFile) {
         var oldPass = getPass('kms-password');
         var newPass = getNewPass(oldPass);
-        if (newPass!==null) {
-            var data = {file: file, oldFile: oldFile, content: str, action: 'write', password: oldPass, newPassword: newPass};
+        if (newPass !== null) {
+            var data = {
+                file: file,
+                oldFile: oldFile,
+                content: str,
+                action: 'write',
+                password: oldPass,
+                newPassword: newPass
+            };
 
             console.log("Saving " + file + " ... ");
             $.ajax({
@@ -482,7 +520,7 @@ var KMS = {};
                     result = $.parseJSON(result);
                     if (!result.success) {
                         console.log(result.message);
-                        saveerr(file);
+                        saveerr(file, result.message);
                     } else {
                         modified = false;
                         console.log("Success");
@@ -493,8 +531,12 @@ var KMS = {};
                     }
                 },
                 error: function () {
-                    saveerr(file);
+                    saveerr(file, "Ajax call failed "+JSON.stringify(data));
                 }
+            });
+        } else {
+            BootstrapDialog.show({
+                message: 'Password not entered'
             });
         }
 
@@ -505,7 +547,7 @@ var KMS = {};
             BootstrapDialog.show({
                 type: BootstrapDialog.TYPE_WARNING,
                 title: 'Error',
-                message: 'Cannot read ' + document.location.href
+                message: 'Failed to read ' + document.location.href
             });
             console.log("Error");
         }
@@ -527,6 +569,9 @@ var KMS = {};
         var file = parser.pathname.substring(1);
         if (file.indexOf('~') === 0) {
             file = file.substring(file.indexOf('/') + 1);
+        }
+        if (file==='') {
+            file = "index.html";
         }
         return file;
     }
@@ -612,7 +657,27 @@ var KMS = {};
         $(window).trigger('hashchange');
     }
 
+    function removePage() {
+        BootstrapDialog.show({
+            type: BootstrapDialog.TYPE_WARNING,
+            title: 'Delete?',
+            message: 'Delete current file?',
+            buttons: [{
+                label: 'Delete',
+                action: function (dialog) {
+                    dialog.close();
+                    sendRemoveRequest();
+                }
+            }, {
+                label: 'Cancel',
+                action: function (dialog) {
+                    dialog.close();
+                }
+            }]
+        });
+    }
 
+    module.removePage = removePage;
     module.savePage = savePage;
     module.savePageAs = savePageAs;
     module.newPage = newPage;
@@ -649,17 +714,17 @@ var KMS = {};
             for (k in anchorMap) {
                 if (anchorMap.hasOwnProperty(k)) {
                     //if (currentAnchorMap[k] !== anchorMap[k]) {
-                        var idtype = anchorMap[k];
-                        var id = idtype.substring(0, idtype.indexOf("."));
-                        var type = idtype.substring(idtype.indexOf("."));
-                        if (k === 'trash') {
-                            Content.deleteContent(id);
-                        } else {
-                            var container = $('#' + k);
-                            container[0].setAttribute('data-content', id);
-                            container[0].setAttribute('data-type', type);
-                            refreshContent(container);
-                        }
+                    var idtype = anchorMap[k];
+                    var id = idtype.substring(0, idtype.indexOf("."));
+                    var type = idtype.substring(idtype.indexOf("."));
+                    if (k === 'trash') {
+                        Content.deleteContent(id);
+                    } else {
+                        var container = $('#' + k);
+                        container[0].setAttribute('data-content', id);
+                        container[0].setAttribute('data-type', type);
+                        refreshContent(container);
+                    }
                     //}
                 }
             }
@@ -682,6 +747,8 @@ var KMS = {};
                     return $('#kms-file').val();
                 }, get password() {
                     return getPass('kms-password');
+                }, get oldFile() {
+                    return getCurrentFileName();
                 }
             },
             fileName: 'uploaded',
@@ -703,7 +770,7 @@ var KMS = {};
                     console.log(data.message);
                     BootstrapDialog.show({
                         type: BootstrapDialog.TYPE_WARNING,
-                        message: 'Upload failed. '
+                        message: 'Upload failed. '+data.message
                     });
                 }
             },
@@ -894,7 +961,7 @@ var KMS = {};
             '	<div class="row">        ' +
             '		<div id="kms-collapse" class="collapse">            ' +
             '           <legend>KMS Control Center</legend>' +
-            '			<form class="form-horizontal">' +
+            '			<div class="form-horizontal">' +
             '	            <fieldset>' +
             '	                <div class="form-group">' +
             '						<label class="col-md-4 control-label" for="kms-key1">Encryption/Decryption Key</label>' +
@@ -929,7 +996,7 @@ var KMS = {};
             '	                <div class="form-group">' +
             '						<label class="col-md-4 control-label" for="kms-file">Remote File Name</label>' +
             '						<div class="col-md-6">                ' +
-            '							<input type="password" id="kms-file" class="pull-right form-control input-sm" style="padding: 1em;" placeholder="Remote File Name ...">            ' +
+            '							<input type="text" id="kms-file" class="pull-right form-control input-sm" style="padding: 1em;" placeholder="Remote File Name ...">            ' +
             '						</div>' +
             '					</div>' +
             '	                <div class="form-group">' +
@@ -944,13 +1011,14 @@ var KMS = {};
             '							<button onclick="KMS.refreshPage()" class="btn btn-primary" title="Refresh page">Refresh</button>                ' +
             '							<button onclick="KMS.savePage()" class="btn btn-primary" title="Save">Save</button>                ' +
             '							<button onclick="KMS.download()" class="btn btn-primary" title="Download">Download</button>                ' +
+            '							<button onclick="KMS.removePage()" class="btn btn-primary" title="Remove page">Delete</button>                ' +
             '							<button onclick="KMS.newPage()" class="btn btn-primary" title="Create new using file name">New</button>                ' +
             '							<button onclick="KMS.savePageAs()" class="btn btn-primary" title="Save as file name">Save as</button>                ' +
             '							<button onclick="KMS.listContents()" class="btn btn-primary" title="List contents for removal.  Must save after removal.">List Contents</button>            ' +
             '                    	</div>' +
             '	                </div>' +
             '				</fieldset>' +
-            '			</form>' +
+            '			</div>' +
             '		</div>    ' +
             '	</div>' +
             '</div>');
