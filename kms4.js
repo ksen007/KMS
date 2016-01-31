@@ -478,7 +478,8 @@ var KMS = {};
             type: 'POST',
             data: data,
             success: function (result) {
-                result = $.parseJSON(result);
+                if (typeof result === 'string')
+                    result = $.parseJSON(result);
                 if (!result.success) {
                     console.log(result.message);
                     saveerr(file, result.message);
@@ -517,7 +518,8 @@ var KMS = {};
                 type: 'POST',
                 data: data,
                 success: function (result) {
-                    result = $.parseJSON(result);
+                    if (typeof result === 'string')
+                        result = $.parseJSON(result);
                     if (!result.success) {
                         console.log(result.message);
                         saveerr(file, result.message);
@@ -756,7 +758,8 @@ var KMS = {};
                 console.log('Plugin successfully initialized');
             },
             onUploadSuccess: function (id, data) {
-                data = $.parseJSON(data);
+                if (typeof data === 'string')
+                    data = $.parseJSON(data);
 
                 var outcome = data.success;
                 if (outcome) {
