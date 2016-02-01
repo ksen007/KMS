@@ -319,11 +319,11 @@ var KMS = {};
         }
         oldTransformer = content.getTransformer();
 
-        html = oldTransformer(interHtml);
+        html = oldTransformer(interHtml, content);
         html = html.replace(/{{THISCONTENT}}/g, "KMS.Content.getContent('" + contentid + "','" + content.type + "')");
         container.html(html);
         if (content.getTransformer() !== oldTransformer) {
-            html = content.getTransformer(interHtml);
+            html = content.getTransformer(interHtml, content);
             html = html.replace(/{{THISCONTENT}}/g, "KMS.Content.getContent('" + contentid + "','" + content.type + "')");
             container.html(html);
         }
@@ -344,11 +344,11 @@ var KMS = {};
         this.updateTime = updateTime;
     }
 
-    Content.defaultTransformer = function (text) {
+    Content.defaultTransformer = function (text, content) {
         var prefix =
-            '<span class="glyphicon glyphicon-remove-circle pull-right" style="z-index: 10000; padding: 2px; display: none;" title="Cancel edit"  onclick="KMS.cancelAction(this,{{THISCONTENT}})"></span>' +
-            '<span class="glyphicon glyphicon-check pull-right" style="z-index: 10000; padding: 2px; display: none;" title="Save"  onclick="KMS.saveAction(this,{{THISCONTENT}})"></span>' +
-            '<span class="glyphicon glyphicon-edit pull-right" style="z-index: 10000; padding: 2px;" title="Edit" onclick="KMS.editAction(this,{{THISCONTENT}})"></span>' +
+            '<span class="glyphicon glyphicon-remove-circle pull-right" style="z-index: 10000; padding: 2px; display: none;" title="Cancel edit of '+content.getId()+'"  onclick="KMS.cancelAction(this,{{THISCONTENT}})" ></span>' +
+            '<span class="glyphicon glyphicon-check pull-right" style="z-index: 10000; padding: 2px; display: none;" title="Save '+content.getId()+'"  onclick="KMS.saveAction(this,{{THISCONTENT}})"></span>' +
+            '<span class="glyphicon glyphicon-edit pull-right" style="z-index: 10000; padding: 2px;" title="Edit '+content.getId()+'" onclick="KMS.editAction(this,{{THISCONTENT}})"></span>' +
             '<textarea style="z-index: 10000; display: none"></textarea>' +
             '<div>';
         var suffix = '</div>';
