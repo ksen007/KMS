@@ -448,7 +448,7 @@ var KMS = {};
             '" data-creation-time="' + this.getCreationTime() +
             '" data-update-time="' + this.getUpdateTime() +
             '">' +
-            txt.replace(/<(\/textarea>)/gi, '&lt;$1') +
+            txt.replace(/<(\/textarea>)/gi, '&lt;$1').replace(/&/gi,'&amp;') +
             '\x3C/textarea>\n\n<!-- SEPARATOR -->\n';
 
     };
