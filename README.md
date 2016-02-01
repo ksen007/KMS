@@ -35,6 +35,9 @@ converter function is defined above.
 
  * **KMS.URL** - The URL of the readwrite2.php file.
 
+ * **KMS.loadScriptsOnce(scriptList, globalVar, callback)** -- if **globalVar** is undefined, this method loads the list
+ of scripts given by **scriptList** and runs **callback** after loading all the scripts.
+
  * **Content** - Content class describes a content in KMS.  It has the following methods:
     * **getText()** - returns the text associated with the content.
     * **setText(text)** - sets the text of the content to **text**.

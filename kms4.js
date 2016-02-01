@@ -311,7 +311,12 @@ var KMS = {};
         var text = content.getText();
 
         var html, interHtml, oldTransformer;
-        interHtml = getParser(content.getType())(text, content);
+        try {
+            interHtml = getParser(content.getType())(text, content);
+        } catch(e) {
+            console.log(e);
+            interHtml = "";
+        }
         oldTransformer = content.getTransformer();
 
         html = oldTransformer(interHtml);
@@ -1051,5 +1056,6 @@ var KMS = {};
     module.setPlugin = setPlugin;
     module.getPlugin = getPlugin;
     module.URL = "https://apps.eecs.berkeley.edu/~ksen/readwrite2.php";
+    module.loadScriptsOnce = loadScriptsOnce;
 
 }(KMS));
