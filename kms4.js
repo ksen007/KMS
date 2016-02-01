@@ -311,27 +311,34 @@ var KMS = {};
         var text = content.getText();
 
         var html, interHtml, oldTransformer;
+
+        function postF(interHtml) {
+            oldTransformer = content.getTransformer();
+
+            html = oldTransformer(interHtml, content);
+            html = html.replace(/{{THISCONTENT}}/g, "KMS.Content.getContent('" + contentid + "','" + content.type + "')");
+            container.html(html);
+            if (content.getTransformer() !== oldTransformer) {
+                html = content.getTransformer(interHtml, content);
+                html = html.replace(/{{THISCONTENT}}/g, "KMS.Content.getContent('" + contentid + "','" + content.type + "')");
+                container.html(html);
+            }
+
+            container.find('.kms-location').each(function (i) {
+                var dis = $(this);
+                refreshContent(dis);
+            });
+        }
+
         try {
-            interHtml = getParser(content.getType())(text, content);
+            interHtml = getParser(content.getType())(text, content, postF);
         } catch(e) {
             console.log(e);
             interHtml = "";
         }
-        oldTransformer = content.getTransformer();
-
-        html = oldTransformer(interHtml, content);
-        html = html.replace(/{{THISCONTENT}}/g, "KMS.Content.getContent('" + contentid + "','" + content.type + "')");
-        container.html(html);
-        if (content.getTransformer() !== oldTransformer) {
-            html = content.getTransformer(interHtml, content);
-            html = html.replace(/{{THISCONTENT}}/g, "KMS.Content.getContent('" + contentid + "','" + content.type + "')");
-            container.html(html);
+        if (typeof interHtml === 'string') {
+            postF(interHtml)
         }
-
-        container.find('.kms-location').each(function (i) {
-            var dis = $(this);
-            refreshContent(dis);
-        });
     }
 
 
@@ -710,7 +717,11 @@ var KMS = {};
         }
         console.log("Hashchange " + hash);
         if (hash.indexOf('#!') == 0) {
-            hash = hash.substring(2);
+            var pipeindex = hash.indexOf("|");
+            if (pipeindex < 0) {
+                pipeindex = hash.length;
+            }
+            hash = hash.substring(2, pipeindex);
             var anchorMap = {};
             var kvs = hash.split('&');
             for (var i = 0; i < kvs.length; i++) {
@@ -1057,5 +1068,7 @@ var KMS = {};
     module.getPlugin = getPlugin;
     module.URL = "https://apps.eecs.berkeley.edu/~ksen/readwrite2.php";
     module.loadScriptsOnce = loadScriptsOnce;
+    module.escape = escape;
+    module.unescape = unescape;
 
 }(KMS));
