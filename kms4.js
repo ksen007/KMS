@@ -54,11 +54,7 @@ var KMS = {};
     var pCounter = 2;
 
     function getPass(id) {
-        var href = window.location.href;
-        var hashIndex = href.indexOf("#");
-        if (hashIndex > 0) {
-            href = href = href.substring(0, hashIndex);
-        }
+        var href = window.location.origin+window.location.pathname;
         var key = href + ":" + id;
         var currVal = document.getElementById(id).value;
         if (currVal !== undefined && currVal.length > 0) {
@@ -965,9 +961,23 @@ var KMS = {};
         return true;
     }
 
+    function reloadToAvoidCache() {
+        var searchPref = "?rnd=";
+        var search = window.location.search;
+        var loc = window.location;
+        var n =  (new Date()).getTime();
+        if (typeof search !== 'string' || search.length <= 0) {
+            window.location.href = loc.origin + loc.pathname + searchPref + n + loc.hash;
+        } else if ((+search.substring(searchPref.length)) + 60000 <= n) {
+//            console.log((search.substring(searchPref.length)|0) + 60000);
+             window.location.href = loc.origin+loc.pathname+searchPref+n+loc.hash;
+        }
+    }
+
     /********************************************************************/
 
     $(document).ready(function () {
+            reloadToAvoidCache();
             console.log("Populating page");
             //var hash = window.location.hash;
             //if (hash !== '') {
