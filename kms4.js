@@ -931,9 +931,9 @@ var KMS = {};
                 $buttonSave.hide();
                 $buttonHardSave.hide();
                 $buttonCancel.hide();
-                $divtext.hide();
                 $divhtml.show();
                 editor.toTextArea();
+                $divtext.hide();
                 content.editor = undefined;
             }
         });
@@ -951,15 +951,15 @@ var KMS = {};
             var $buttonCancel = $(siblings[i + 2]);
             var editor = content.editor;
 
-            if (content.setText(editor.getValue())) {
+            if (content.setTextAndSave(editor.getValue())) {
                 $buttonEdit.show();
                 $buttonSave.hide();
                 $buttonHardSave.hide();
                 $buttonCancel.hide();
-                $divtext.hide();
                 $divhtml.show();
-                savePage();
+//                savePage();
                 editor.toTextArea();
+                $divtext.hide();
                 content.editor = undefined;
             }
         });
@@ -984,9 +984,9 @@ var KMS = {};
                 $buttonSave.hide();
                 $buttonHardSave.hide();
                 $buttonCancel.hide();
-                $divtext.hide();
                 $divhtml.show();
                 editor.toTextArea();
+                $divtext.hide();
                 content.editor = undefined;
             } else {
                 BootstrapDialog.show({
@@ -1001,9 +1001,9 @@ var KMS = {};
                             $buttonSave.hide();
                             $buttonHardSave.hide();
                             $buttonCancel.hide();
+                            $divhtml.show();
                             editor.toTextArea();
                             $divtext.hide();
-                            $divhtml.show();
                             $divtext[0].editor = undefined;
                         }
                     }, {
