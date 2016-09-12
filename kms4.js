@@ -11,9 +11,10 @@ var KMS = {};
 
 
     var queryMap = {};
+
     function parseQuery() {
         var query = window.location.search;
-        if (typeof query === "string" && query.indexOf("?")===0) {
+        if (typeof query === "string" && query.indexOf("?") === 0) {
             query = query.substring(1);
             var vars = query.split('&');
             for (var i = 0; i < vars.length; i++) {
@@ -31,13 +32,13 @@ var KMS = {};
         queryMap[key] = value;
         for (var prop in queryMap) {
             // skip loop if the property is from prototype
-            if(!queryMap.hasOwnProperty(prop)) continue;
+            if (!queryMap.hasOwnProperty(prop)) continue;
             if (ret === "") {
                 ret = "?";
             } else {
                 ret += "&";
             }
-            ret += encodeURIComponent(prop) +"=" + encodeURIComponent(queryMap[prop]);
+            ret += encodeURIComponent(prop) + "=" + encodeURIComponent(queryMap[prop]);
         }
         if (old === undefined) {
             delete queryMap[key];
@@ -51,7 +52,7 @@ var KMS = {};
     /********************************************************************/
 
     function loadScriptsOnce(scriptList, globalVar, cb) {
-        if (typeof window[globalVar] === 'undefined') {
+        if ((typeof globalVar === "string" && typeof window[globalVar] === 'undefined') || globalVar) {
 
             function getScript(url, success) {
                 var script = document.createElement('script');
@@ -92,7 +93,7 @@ var KMS = {};
     var pCounter = 2;
 
     function getPass(id) {
-        var href = window.location.origin+window.location.pathname;
+        var href = window.location.origin + window.location.pathname;
         var key = href + ":" + id;
         var iddiv = document.getElementById(id);
         var currVal;
@@ -111,7 +112,8 @@ var KMS = {};
                 var pass = CryptoJS.AES.decrypt(oldVal, id + (pCounter));
                 if (pass.sigBytes > 0) {
                     var clearPass = pass.toString(CryptoJS.enc.Utf8);
-                    document.getElementById(id).value = clearPass;
+                    if (iddiv)
+                        document.getElementById(id).value = clearPass;
                     return clearPass;
                 }
             }
@@ -372,7 +374,7 @@ var KMS = {};
 
         try {
             interHtml = getParser(content.getType())(text, content, postF);
-        } catch(e) {
+        } catch (e) {
             console.log(e);
             interHtml = "";
         }
@@ -394,12 +396,12 @@ var KMS = {};
     Content.defaultTransformer = function (text, content) {
         var prefix = '<div>';
         var suffix = '</div>';
-        if (queryMap["edit"] ==="true" ) {
+        if (queryMap["edit"] === "true") {
             suffix += '<textarea style="z-index: 10000; display: none"></textarea>' +
-            '<span class="glyphicon glyphicon-edit" style="z-index: 10000; padding: 2px;" title="Edit ' + content.getId() + '" onclick="KMS.editAction(this,{{THISCONTENT}})"></span>' +
-            '<span class="glyphicon glyphicon-eye-open" style="z-index: 10000; padding: 2px; display: none;" title="Preview ' + content.getId() + '"  onclick="KMS.previewAction(this,{{THISCONTENT}})"></span>' +
+                '<span class="glyphicon glyphicon-edit" style="z-index: 10000; padding: 2px;" title="Edit ' + content.getId() + '" onclick="KMS.editAction(this,{{THISCONTENT}})"></span>' +
+                '<span class="glyphicon glyphicon-eye-open" style="z-index: 10000; padding: 2px; display: none;" title="Preview ' + content.getId() + '"  onclick="KMS.previewAction(this,{{THISCONTENT}})"></span>' +
                 '<span class="glyphicon glyphicon-check" style="z-index: 10000; padding: 2px; display: none;" title="Save ' + content.getId() + '"  onclick="KMS.saveAction(this,{{THISCONTENT}})"></span>' +
-            '<span class="glyphicon glyphicon-remove-circle" style="z-index: 10000; padding: 2px; display: none;" title="Cancel edit of ' + content.getId() + '"  onclick="KMS.cancelAction(this,{{THISCONTENT}})" ></span>';
+                '<span class="glyphicon glyphicon-remove-circle" style="z-index: 10000; padding: 2px; display: none;" title="Cancel edit of ' + content.getId() + '"  onclick="KMS.cancelAction(this,{{THISCONTENT}})" ></span>';
         }
         return prefix + text + suffix;
     };
@@ -439,6 +441,12 @@ var KMS = {};
 
     Content.prototype.getType = function () {
         return this.type;
+    };
+
+    Content.prototype.setTextAndSave = function (text) {
+        var ret = this.setText(text);
+        if (ret) savePage();
+        return ret;
     };
 
     Content.prototype.setText = function (text) {
@@ -490,7 +498,7 @@ var KMS = {};
             '" data-creation-time="' + this.getCreationTime() +
             '" data-update-time="' + this.getUpdateTime() +
             '">' +
-            txt.replace(/<(\/textarea>)/gi, '&lt;$1').replace(/&/gi,'&amp;') +
+            txt.replace(/<(\/textarea>)/gi, '&lt;$1').replace(/&/gi, '&amp;') +
             '\x3C/textarea>\n\n<!-- SEPARATOR -->\n';
 
     };
@@ -515,7 +523,7 @@ var KMS = {};
         BootstrapDialog.show({
             type: BootstrapDialog.TYPE_WARNING,
             title: 'Error',
-            message: 'Cannot save ' + file+". "+message
+            message: 'Cannot save ' + file + ". " + message
         });
         console.log("Error");
     }
@@ -547,7 +555,7 @@ var KMS = {};
                 }
             },
             error: function () {
-                saveerr(file, "Ajax call failed "+JSON.stringify(data));
+                saveerr(file, "Ajax call failed " + JSON.stringify(data));
             }
         });
 
@@ -581,13 +589,16 @@ var KMS = {};
                         modified = false;
                         console.log("Success");
                         console.log(result['data']);
-                        BootstrapDialog.show({
-                            message: 'Successfully saved ' + data.file
+                        loadScriptsOnce(["libkms/notify.js"], typeof $.notify !== "function", function () {
+                            $.notify('Successfully saved ' + data.file, "success");
                         });
+                        // BootstrapDialog.show({
+                        //     message: 'Successfully saved ' + data.file
+                        // });
                     }
                 },
                 error: function () {
-                    saveerr(file, "Ajax call failed "+JSON.stringify(data));
+                    saveerr(file, "Ajax call failed " + JSON.stringify(data));
                 }
             });
         } else {
@@ -626,7 +637,7 @@ var KMS = {};
         if (file.indexOf('~') === 0) {
             file = file.substring(file.indexOf('/') + 1);
         }
-        if (file==='') {
+        if (file === '') {
             file = "index.html";
         }
         return file;
@@ -831,7 +842,7 @@ var KMS = {};
                     console.log(data.message);
                     BootstrapDialog.show({
                         type: BootstrapDialog.TYPE_WARNING,
-                        message: 'Upload failed. '+data.message
+                        message: 'Upload failed. ' + data.message
                     });
                 }
             },
@@ -865,8 +876,8 @@ var KMS = {};
                 var $divtext = $(siblings[1]);
                 var $buttonEdit = $(e);
                 var $buttonSave = $(siblings[i]);
-                var $buttonHardSave = $(siblings[i+1]);
-                var $buttonCancel = $(siblings[i+2]);
+                var $buttonHardSave = $(siblings[i + 1]);
+                var $buttonCancel = $(siblings[i + 2]);
 
 
                 $buttonSave.show();
@@ -911,8 +922,8 @@ var KMS = {};
             var $divtext = $(siblings[1]);
             var $buttonEdit = $(siblings[i]);
             var $buttonSave = $(e);
-            var $buttonHardSave = $(siblings[i+1]);
-            var $buttonCancel = $(siblings[i+2]);
+            var $buttonHardSave = $(siblings[i + 1]);
+            var $buttonCancel = $(siblings[i + 2]);
             var editor = content.editor;
 
             if (content.setText(editor.getValue())) {
@@ -935,9 +946,9 @@ var KMS = {};
             var $divhtml = $(siblings[0]);
             var $divtext = $(siblings[1]);
             var $buttonEdit = $(siblings[i]);
-            var $buttonSave = $(siblings[i+1]);
+            var $buttonSave = $(siblings[i + 1]);
             var $buttonHardSave = $(e);
-            var $buttonCancel = $(siblings[i+2]);
+            var $buttonCancel = $(siblings[i + 2]);
             var editor = content.editor;
 
             if (content.setText(editor.getValue())) {
@@ -961,8 +972,8 @@ var KMS = {};
             var $divhtml = $(siblings[0]);
             var $divtext = $(siblings[1]);
             var $buttonEdit = $(siblings[i]);
-            var $buttonSave = $(siblings[i+1]);
-            var $buttonHardSave = $(siblings[i+2]);
+            var $buttonSave = $(siblings[i + 1]);
+            var $buttonHardSave = $(siblings[i + 2]);
             var $buttonCancel = $(e);
             var editor = content.editor;
 
@@ -1047,7 +1058,7 @@ var KMS = {};
     function reloadToAvoidCache() {
         parseQuery();
         var loc = window.location;
-        var n =  (new Date()).getTime();
+        var n = (new Date()).getTime();
         if (queryMap.hasOwnProperty("rnd")) {
             if ((+queryMap["rnd"]) + 60000 <= n) {
                 window.location.href = loc.origin + loc.pathname + encodeQuery("rnd", n) + loc.hash;
@@ -1072,79 +1083,79 @@ var KMS = {};
             //if (hash !== '') {
             //    anchorLoadChange();
             //}
-        if (queryMap["edit"]==="true") {
-            $('body').append('<div class="container" style="z-index: 10000;">' +
-                '	<a data-toggle="collapse" href="#kms-collapse">        ' +
-                '		 <span class="glyphicon glyphicon-cog"></span>    ' +
-                '	</a>    ' +
-                '	<div class="row">        ' +
-                '		<div id="kms-collapse" class="collapse">            ' +
-                '           <legend>KMS Control Center</legend>' +
-                '			<div class="form-horizontal">' +
-                '	            <fieldset>' +
-                '	                <div class="form-group">' +
-                '						<label class="col-md-4 control-label" for="kms-key1">Encryption/Decryption Key</label>' +
-                '						<div class="col-md-6">                ' +
-                '							<input type="password" id="kms-key1" class="pull-right form-control input-sm" style="padding: 1em;" placeholder="Key for encryption/decryption ...">            ' +
-                '						</div>' +
-                '					</div>' +
-                '	                <div class="form-group">' +
-                '						<label class="col-md-4 control-label" for="kms-key2">Re-enter Encryption Key</label>' +
-                '						<div class="col-md-6">                ' +
-                '							<input type="password" id="kms-key2" class="pull-right form-control input-sm" style="padding: 1em;" placeholder="Re-enter Key for encryption ...">            ' +
-                '						</div>' +
-                '					</div>' +
-                '	                <div class="form-group">' +
-                '						<label class="col-md-4 control-label" for="kms-password">Password for Remote Server</label>' +
-                '						<div class="col-md-6">                ' +
-                '							<input type="password" id="kms-password" class="pull-right form-control input-sm" style="padding: 1em;" placeholder="Password for Remote Server ...">            ' +
-                '						</div>' +
-                '					</div>' +
-                '	                <div class="form-group">' +
-                '						<label class="col-md-4 control-label" for="kms-password-new1">New Password for Remote Server</label>' +
-                '						<div class="col-md-6">                ' +
-                '							<input type="password" id="kms-password-new1" class="pull-right form-control input-sm" style="padding: 1em;" placeholder="New Password for Remote Server ...">            ' +
-                '						</div>' +
-                '					</div>' +
-                '	                <div class="form-group">' +
-                '						<label class="col-md-4 control-label" for="kms-password-new2">Re-enter New Password for Remote Server</label>' +
-                '						<div class="col-md-6">                ' +
-                '							<input type="password" id="kms-password-new2" class="pull-right form-control input-sm" style="padding: 1em;" placeholder="Re-enter New Password for Remote Server ...">            ' +
-                '						</div>' +
-                '					</div>' +
-                '	                <div class="form-group">' +
-                '						<label class="col-md-4 control-label" for="kms-file">Remote File Name</label>' +
-                '						<div class="col-md-6">                ' +
-                '							<input type="text" id="kms-file" class="pull-right form-control input-sm" style="padding: 1em;" placeholder="Remote File Name ...">            ' +
-                '						</div>' +
-                '					</div>' +
-                '	                <div class="form-group">' +
-                '						<label class="col-md-4 control-label" for="kms-drop-area-div">File Upload Area</label>' +
-                '						<div id="kms-drop-area-div" class="col-md-6" style="border-style: dashed; height: 3em; padding: 0.6em;">' +
-                '							Drag and Drop Files Here<br>            ' +
-                '						</div>            ' +
-                '					</div>' +
-                '					<div class="form-group">' +
-                '						<label class="col-md-4 control-label"></label>' +
-                '	                    <div class="col-md-8">' +
-                '							<button onclick="KMS.refreshPage()" class="btn btn-primary" title="Refresh page">Refresh</button>                ' +
-                '							<button onclick="KMS.savePage()" class="btn btn-primary" title="Save">Save</button>                ' +
-                '							<button onclick="KMS.download()" class="btn btn-primary" title="Download">Download</button>                ' +
-                '							<button onclick="KMS.removePage()" class="btn btn-primary" title="Remove page">Delete</button>                ' +
-                '							<button onclick="KMS.newPage()" class="btn btn-primary" title="Create new using file name">New</button>                ' +
-                '							<button onclick="KMS.savePageAs()" class="btn btn-primary" title="Save as file name">Save as</button>                ' +
-                '							<button onclick="KMS.listContents()" class="btn btn-primary" title="List contents for removal.  Must save after removal.">List Contents</button>            ' +
-                '                    	</div>' +
-                '	                </div>' +
-                '				</fieldset>' +
-                '			</div>' +
-                '		</div>    ' +
-                '	</div>' +
-                '</div>');
-            initUploader();
-        } else {
-            $('body').append('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="'+encodeQuery("edit", "true")+'">...</a>');
-        }
+            if (queryMap["edit"] === "true") {
+                $('body').append('<div class="container" style="z-index: 10000;">' +
+                    '	<a data-toggle="collapse" href="#kms-collapse">        ' +
+                    '		 <span class="glyphicon glyphicon-cog"></span>    ' +
+                    '	</a>    ' +
+                    '	<div class="row">        ' +
+                    '		<div id="kms-collapse" class="collapse">            ' +
+                    '           <legend>KMS Control Center</legend>' +
+                    '			<div class="form-horizontal">' +
+                    '	            <fieldset>' +
+                    '	                <div class="form-group">' +
+                    '						<label class="col-md-4 control-label" for="kms-key1">Encryption/Decryption Key</label>' +
+                    '						<div class="col-md-6">                ' +
+                    '							<input type="password" id="kms-key1" class="pull-right form-control input-sm" style="padding: 1em;" placeholder="Key for encryption/decryption ...">            ' +
+                    '						</div>' +
+                    '					</div>' +
+                    '	                <div class="form-group">' +
+                    '						<label class="col-md-4 control-label" for="kms-key2">Re-enter Encryption Key</label>' +
+                    '						<div class="col-md-6">                ' +
+                    '							<input type="password" id="kms-key2" class="pull-right form-control input-sm" style="padding: 1em;" placeholder="Re-enter Key for encryption ...">            ' +
+                    '						</div>' +
+                    '					</div>' +
+                    '	                <div class="form-group">' +
+                    '						<label class="col-md-4 control-label" for="kms-password">Password for Remote Server</label>' +
+                    '						<div class="col-md-6">                ' +
+                    '							<input type="password" id="kms-password" class="pull-right form-control input-sm" style="padding: 1em;" placeholder="Password for Remote Server ...">            ' +
+                    '						</div>' +
+                    '					</div>' +
+                    '	                <div class="form-group">' +
+                    '						<label class="col-md-4 control-label" for="kms-password-new1">New Password for Remote Server</label>' +
+                    '						<div class="col-md-6">                ' +
+                    '							<input type="password" id="kms-password-new1" class="pull-right form-control input-sm" style="padding: 1em;" placeholder="New Password for Remote Server ...">            ' +
+                    '						</div>' +
+                    '					</div>' +
+                    '	                <div class="form-group">' +
+                    '						<label class="col-md-4 control-label" for="kms-password-new2">Re-enter New Password for Remote Server</label>' +
+                    '						<div class="col-md-6">                ' +
+                    '							<input type="password" id="kms-password-new2" class="pull-right form-control input-sm" style="padding: 1em;" placeholder="Re-enter New Password for Remote Server ...">            ' +
+                    '						</div>' +
+                    '					</div>' +
+                    '	                <div class="form-group">' +
+                    '						<label class="col-md-4 control-label" for="kms-file">Remote File Name</label>' +
+                    '						<div class="col-md-6">                ' +
+                    '							<input type="text" id="kms-file" class="pull-right form-control input-sm" style="padding: 1em;" placeholder="Remote File Name ...">            ' +
+                    '						</div>' +
+                    '					</div>' +
+                    '	                <div class="form-group">' +
+                    '						<label class="col-md-4 control-label" for="kms-drop-area-div">File Upload Area</label>' +
+                    '						<div id="kms-drop-area-div" class="col-md-6" style="border-style: dashed; height: 3em; padding: 0.6em;">' +
+                    '							Drag and Drop Files Here<br>            ' +
+                    '						</div>            ' +
+                    '					</div>' +
+                    '					<div class="form-group">' +
+                    '						<label class="col-md-4 control-label"></label>' +
+                    '	                    <div class="col-md-8">' +
+                    '							<button onclick="KMS.refreshPage()" class="btn btn-primary" title="Refresh page">Refresh</button>                ' +
+                    '							<button onclick="KMS.savePage()" class="btn btn-primary" title="Save">Save</button>                ' +
+                    '							<button onclick="KMS.download()" class="btn btn-primary" title="Download">Download</button>                ' +
+                    '							<button onclick="KMS.removePage()" class="btn btn-primary" title="Remove page">Delete</button>                ' +
+                    '							<button onclick="KMS.newPage()" class="btn btn-primary" title="Create new using file name">New</button>                ' +
+                    '							<button onclick="KMS.savePageAs()" class="btn btn-primary" title="Save as file name">Save as</button>                ' +
+                    '							<button onclick="KMS.listContents()" class="btn btn-primary" title="List contents for removal.  Must save after removal.">List Contents</button>            ' +
+                    '                    	</div>' +
+                    '	                </div>' +
+                    '				</fieldset>' +
+                    '			</div>' +
+                    '		</div>    ' +
+                    '	</div>' +
+                    '</div>');
+                initUploader();
+            } else {
+                $('body').append('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="' + encodeQuery("edit", "true") + '">...</a>');
+            }
             collectContents();
             getPass('kms-key1');
             getPass('kms-key2');

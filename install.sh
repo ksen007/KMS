@@ -28,6 +28,7 @@ wget -O creole.js http://sourceforge.net/p/jscreole/code/HEAD/tree/creole.js?for
 wget http://bibtex-js.googlecode.com/svn/trunk/src/bibtex_js.js
 wget https://raw.githubusercontent.com/danielm/uploader/master/src/dmuploader.min.js
 wget http://getbootstrap.com/examples/blog/blog.css
+wget https://rawgit.com/notifyjs/notifyjs/master/dist/notify.js
 
 cd ..
 rm -rf fonts
