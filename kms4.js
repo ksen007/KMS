@@ -397,7 +397,8 @@ var KMS = {};
         if (queryMap["edit"] ==="true" ) {
             suffix += '<textarea style="z-index: 10000; display: none"></textarea>' +
             '<span class="glyphicon glyphicon-edit" style="z-index: 10000; padding: 2px;" title="Edit ' + content.getId() + '" onclick="KMS.editAction(this,{{THISCONTENT}})"></span>' +
-            '<span class="glyphicon glyphicon-check" style="z-index: 10000; padding: 2px; display: none;" title="Save ' + content.getId() + '"  onclick="KMS.saveAction(this,{{THISCONTENT}})"></span>' +
+            '<span class="glyphicon glyphicon-eye-open" style="z-index: 10000; padding: 2px; display: none;" title="Preview ' + content.getId() + '"  onclick="KMS.previewAction(this,{{THISCONTENT}})"></span>' +
+                '<span class="glyphicon glyphicon-check" style="z-index: 10000; padding: 2px; display: none;" title="Save ' + content.getId() + '"  onclick="KMS.saveAction(this,{{THISCONTENT}})"></span>' +
             '<span class="glyphicon glyphicon-remove-circle" style="z-index: 10000; padding: 2px; display: none;" title="Cancel edit of ' + content.getId() + '"  onclick="KMS.cancelAction(this,{{THISCONTENT}})" ></span>';
         }
         return prefix + text + suffix;
@@ -864,10 +865,12 @@ var KMS = {};
                 var $divtext = $(siblings[1]);
                 var $buttonEdit = $(e);
                 var $buttonSave = $(siblings[i]);
-                var $buttonCancel = $(siblings[i+1]);
+                var $buttonHardSave = $(siblings[i+1]);
+                var $buttonCancel = $(siblings[i+2]);
 
 
                 $buttonSave.show();
+                $buttonHardSave.show();
                 $buttonCancel.show();
                 $buttonEdit.hide();
                 $divhtml.hide();
@@ -887,7 +890,7 @@ var KMS = {};
                         }
                     }
                 });
-                $divtext[0].editor = editor;
+                content.editor = editor;
                 editor.setValue(dec);
             } else {
                 BootstrapDialog.show({
@@ -900,7 +903,7 @@ var KMS = {};
     }
 
 
-    function saveAction(e, content) {
+    function previewAction(e, content) {
         loadScriptsOnce(codeMirrorSrcUrls, 'CodeMirror', function () {
             var i = 3;
             var siblings = $(e).siblings();
@@ -908,17 +911,45 @@ var KMS = {};
             var $divtext = $(siblings[1]);
             var $buttonEdit = $(siblings[i]);
             var $buttonSave = $(e);
-            var $buttonCancel = $(siblings[i+1]);
-            var editor = $divtext[0].editor;
+            var $buttonHardSave = $(siblings[i+1]);
+            var $buttonCancel = $(siblings[i+2]);
+            var editor = content.editor;
 
             if (content.setText(editor.getValue())) {
                 $buttonEdit.show();
                 $buttonSave.hide();
+                $buttonHardSave.hide();
                 $buttonCancel.hide();
-                editor.toTextArea();
                 $divtext.hide();
                 $divhtml.show();
-                $divtext[0].editor = undefined;
+                editor.toTextArea();
+                content.editor = undefined;
+            }
+        });
+    }
+
+    function saveAction(e, content) {
+        loadScriptsOnce(codeMirrorSrcUrls, 'CodeMirror', function () {
+            var i = 3;
+            var siblings = $(e).siblings();
+            var $divhtml = $(siblings[0]);
+            var $divtext = $(siblings[1]);
+            var $buttonEdit = $(siblings[i]);
+            var $buttonSave = $(siblings[i+1]);
+            var $buttonHardSave = $(e);
+            var $buttonCancel = $(siblings[i+2]);
+            var editor = content.editor;
+
+            if (content.setText(editor.getValue())) {
+                $buttonEdit.show();
+                $buttonSave.hide();
+                $buttonHardSave.hide();
+                $buttonCancel.hide();
+                $divtext.hide();
+                $divhtml.show();
+                savePage();
+                editor.toTextArea();
+                content.editor = undefined;
             }
         });
     }
@@ -927,24 +958,25 @@ var KMS = {};
         loadScriptsOnce(codeMirrorSrcUrls, 'CodeMirror', function () {
             var siblings = $(e).siblings();
             var i = 3;
-            var siblings = $(e).siblings();
             var $divhtml = $(siblings[0]);
             var $divtext = $(siblings[1]);
             var $buttonEdit = $(siblings[i]);
             var $buttonSave = $(siblings[i+1]);
+            var $buttonHardSave = $(siblings[i+2]);
             var $buttonCancel = $(e);
-            var editor = $divtext[0].editor;
+            var editor = content.editor;
 
             var text = editor.getValue();
             var oldText = content.getText();
             if (text === oldText) {
                 $buttonEdit.show();
                 $buttonSave.hide();
+                $buttonHardSave.hide();
                 $buttonCancel.hide();
-                editor.toTextArea();
                 $divtext.hide();
                 $divhtml.show();
-                $divtext[0].editor = undefined;
+                editor.toTextArea();
+                content.editor = undefined;
             } else {
                 BootstrapDialog.show({
                     type: BootstrapDialog.TYPE_WARNING,
@@ -956,6 +988,7 @@ var KMS = {};
                             dialog.close();
                             $buttonEdit.show();
                             $buttonSave.hide();
+                            $buttonHardSave.hide();
                             $buttonCancel.hide();
                             editor.toTextArea();
                             $divtext.hide();
@@ -974,6 +1007,7 @@ var KMS = {};
     }
 
     module.editAction = editAction;
+    module.previewAction = previewAction;
     module.saveAction = saveAction;
     module.cancelAction = cancelAction;
 
